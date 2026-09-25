@@ -10,7 +10,18 @@ npm run dev     # start the dev server
 npm test        # unit tests (Vitest)
 npm run check   # typecheck
 npm run build   # production build to dist/
+npm run test:e2e  # end-to-end tests (Playwright)
 ```
+
+If Chromium is already installed, point Playwright at it instead of running `npx playwright install`:
+
+```sh
+CHROMIUM_EXECUTABLE=/path/to/chrome npm run test:e2e
+```
+
+## Deployment
+
+Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedreader/` via `.github/workflows/deploy.yml`. The repository's Pages source must be set to **GitHub Actions**.
 
 ## Layout
 
