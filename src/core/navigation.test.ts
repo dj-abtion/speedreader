@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { tokenize } from './tokenize'
-import { nextSentenceStart, previousSentenceStart, sentenceStart } from './navigation'
+import { nextSentenceStart, previousSentenceStart, sentenceEnd, sentenceStart } from './navigation'
 
 // indexes:            0   1    2     3     4    5
 const tokens = tokenize('One two. Three four. Five six')
@@ -38,5 +38,13 @@ describe('nextSentenceStart', () => {
   it('stays within the last sentence', () => {
     expect(nextSentenceStart(tokens, 4)).toBe(4)
     expect(nextSentenceStart(tokens, 5)).toBe(5)
+  })
+})
+
+describe('sentenceEnd', () => {
+  it('finds the last token of the sentence containing an index', () => {
+    expect(sentenceEnd(tokens, 0)).toBe(1)
+    expect(sentenceEnd(tokens, 2)).toBe(3)
+    expect(sentenceEnd(tokens, 4)).toBe(5)
   })
 })

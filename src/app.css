@@ -1,11 +1,43 @@
 :root {
   color-scheme: light dark;
   font-family: system-ui, sans-serif;
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --surface: #ffffff;
+  --background: #f7f7f5;
+  --accent: #d9480f;
+  --guide: #c8c8c8;
+  --word-size: clamp(2.25rem, 9vw, 4.5rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --surface: #1e1e1e;
+    --background: #121212;
+    --accent: #ff8a4c;
+    --guide: #444444;
+  }
 }
 
 body {
   margin: 0;
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
+  background: var(--background);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--guide);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
