@@ -5,12 +5,14 @@
   let {
     documents,
     storageAvailable,
+    notice = '',
     onAdd,
     onOpen,
     onRemove,
   }: {
     documents: LibraryDocument[]
     storageAvailable: boolean
+    notice?: string
     onAdd: (doc: NewDocument) => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
@@ -53,6 +55,8 @@
 
 <div class="home">
   <h1>Speedreader</h1>
+
+  {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 
   <form onsubmit={submit}>
     <label for="text">Paste the text you want to read</label>
