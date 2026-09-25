@@ -8,9 +8,20 @@
   import { createWakeLock } from './wakeLock'
   import WordDisplay from './WordDisplay.svelte'
 
-  let { tokens, onExit }: { tokens: Token[]; onExit: () => void } = $props()
+  let {
+    tokens,
+    startIndex = 0,
+    onProgress = () => {},
+    onExit,
+  }: {
+    tokens: Token[]
+    startIndex?: number
+    onProgress?: (index: number) => void
+    onExit: () => void
+  } = $props()
 
   const WPM_STEP = 25
+  const SAVE_INTERVAL_MS = 3000
 
   let index = $state(0)
   let playing = $state(false)
@@ -19,15 +30,21 @@
   let wpm = $state(initialWpm)
   let remaining = $state(0)
 
+  let lastSavedAt = 0
+
   const wakeLock = createWakeLock()
   const player = new Player({
-    // Tokens are fixed for the lifetime of this component; a new text mounts a new Reader.
+    // Tokens and start position are fixed for the lifetime of this component; a new text
+    // mounts a new Reader.
     // svelte-ignore state_referenced_locally
     tokens,
+    // svelte-ignore state_referenced_locally
+    position: startIndex,
     wpm: initialWpm,
     onTick: (i) => {
       index = i
       remaining = player.remainingMs
+      if (Date.now() - lastSavedAt >= SAVE_INTERVAL_MS) saveProgress()
     },
     onEnd: () => {
       finished = true
@@ -45,8 +62,17 @@
     playing = player.playing
     wpm = player.wpm
     remaining = player.remainingMs
-    if (playing) wakeLock.acquire()
-    else wakeLock.release()
+    if (playing) {
+      wakeLock.acquire()
+    } else {
+      wakeLock.release()
+      saveProgress()
+    }
+  }
+
+  function saveProgress() {
+    lastSavedAt = Date.now()
+    onProgress(player.index)
   }
 
   function toggle() {
@@ -112,12 +138,14 @@
   }
 
   onMount(() => {
+    finished = player.index > 0 && player.index === tokens.length - 1
     sync()
     document.addEventListener('visibilitychange', onVisibilityChange)
   })
 
   onDestroy(() => {
     player.pause()
+    saveProgress()
     wakeLock.release()
     document.removeEventListener('visibilitychange', onVisibilityChange)
   })
