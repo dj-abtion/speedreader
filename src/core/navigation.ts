@@ -17,3 +17,9 @@ export function nextSentenceStart(tokens: Token[], index: number): number {
   }
   return index
 }
+
+export function sentenceEnd(tokens: Token[], index: number): number {
+  let i = index
+  while (i < tokens.length - 1 && !tokens[i].endsSentence) i++
+  return i
+}
