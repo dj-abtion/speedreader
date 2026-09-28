@@ -1,18 +1,23 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: system-ui, sans-serif;
+  --serif-font: ui-serif, Georgia, 'Times New Roman', serif;
+  --reading-font: inherit;
   --text: #1a1a1a;
   --muted: #6b6b6b;
   --surface: #ffffff;
   --background: #f7f7f5;
   --accent: #d9480f;
   --guide: #c8c8c8;
-  --word-size: clamp(2.25rem, 9vw, 4.5rem);
-  --phrase-size: clamp(1.5rem, 6vw, 3.5rem);
+  --text-scale: 1;
+  --word-size: calc(clamp(2.25rem, 9vw, 4.5rem) * var(--text-scale));
+  --phrase-size: calc(clamp(1.5rem, 6vw, 3.5rem) * var(--text-scale));
 }
 
+/* The theme follows the system unless the reader picked one; both dark rules share values. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
     --text: #ececec;
     --muted: #9a9a9a;
     --surface: #1e1e1e;
@@ -20,6 +25,20 @@
     --accent: #ff8a4c;
     --guide: #444444;
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --text: #ececec;
+  --muted: #9a9a9a;
+  --surface: #1e1e1e;
+  --background: #121212;
+  --accent: #ff8a4c;
+  --guide: #444444;
+}
+
+:root[data-font='serif'] {
+  --reading-font: var(--serif-font);
 }
 
 body {

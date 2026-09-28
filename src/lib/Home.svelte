@@ -1,5 +1,7 @@
 <script lang="ts">
   import { textFromFile, type NewDocument } from '../core/document'
+  import type { Appearance } from './appearance'
+  import AppearanceSettings from './AppearanceSettings.svelte'
   import type { LibraryDocument } from './library'
   import { buildInfo, formatVersion, REPOSITORY_URL } from './version'
 
@@ -7,6 +9,8 @@
     documents,
     storageAvailable,
     notice = '',
+    appearance,
+    onAppearanceChange,
     onAdd,
     onOpen,
     onRemove,
@@ -14,6 +18,8 @@
     documents: LibraryDocument[]
     storageAvailable: boolean
     notice?: string
+    appearance: Appearance
+    onAppearanceChange: (appearance: Appearance) => void
     onAdd: (doc: NewDocument) => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
@@ -92,6 +98,11 @@
       </ul>
     </section>
   {/if}
+
+  <details class="display">
+    <summary>Display</summary>
+    <AppearanceSettings {appearance} onChange={onAppearanceChange} />
+  </details>
 
   <footer class="version">
     {#if buildInfo.commit}
@@ -204,8 +215,12 @@
     white-space: nowrap;
   }
 
+  .display summary {
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+  }
+
   .version {
-    margin-top: 1rem;
     font-size: 0.8rem;
     color: var(--muted);
     font-variant-numeric: tabular-nums;

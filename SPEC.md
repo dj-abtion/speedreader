@@ -47,9 +47,10 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 
 - ORP pivot index by word length: 1 → 0, 2–5 → 1, 6–9 → 2, 10–13 → 3, 14+ → 4.
 - Three-span layout (before | pivot | after) around a fixed column slightly left of centre; pivot in an accent colour with thin guide ticks above and below. Works with proportional fonts.
-- System UI font by default; optional serif.
-- Font size slider S–XL, responsive `clamp()` by default.
+- System UI font by default; optional serif for the reading text.
+- Font size S / M / L / XL, scaling the responsive `clamp()` size (M is the default).
 - Theme follows the system, with a light / dark / system toggle.
+- Theme, font and size are set under "Display" on the home screen or the reader's "Aa" button, remembered in `localStorage`, and applied before the first render so a chosen theme never flashes.
 - No token ever overflows the frame: chunking guarantees this at the default size; at XL a token that would overflow is scaled down.
 
 ## Controls
@@ -61,6 +62,7 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 | Speed −/+ 25 WPM (works while playing) | `↓` / `↑`, − / + buttons |
 | Seek | Draggable progress bar |
 | Words per flash (1–3) | `1` / `2` / `3`, "N words" button |
+| Theme, font, size | "Aa" button |
 
 - Remaining time ("4 min left") shown, computed from current WPM.
 - When paused, the surrounding sentence is shown faintly around the word for context.

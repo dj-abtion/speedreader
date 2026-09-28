@@ -115,3 +115,25 @@ test('shows the build version on the home screen', async ({ page }) => {
     /^https:\/\/github\.com\/dj-abtion\/speedreader\/commit\/[0-9a-f]{40}$/,
   )
 })
+
+test('remembers the chosen theme, font and size', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.goto('./')
+  await pasteAndRead(page, 'Short words.')
+  const defaultSize = await page.locator('.frame').evaluate((el) => getComputedStyle(el).fontSize)
+
+  await page.getByRole('button', { name: 'Display settings' }).click()
+  await page.getByLabel('Dark').check()
+  await page.getByLabel('Serif').check()
+  await page.getByLabel('XL').check()
+
+  await page.reload()
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(18, 18, 18)')
+  await page.getByText('Display').click()
+  await expect(page.getByLabel('Dark')).toBeChecked()
+  await page.getByRole('button', { name: /^Short words/ }).click()
+  const frame = page.locator('.frame')
+  await expect(frame).toHaveCSS('font-family', /serif/)
+  const largeSize = await frame.evaluate((el) => getComputedStyle(el).fontSize)
+  expect(parseFloat(largeSize)).toBeGreaterThan(parseFloat(defaultSize))
+})
