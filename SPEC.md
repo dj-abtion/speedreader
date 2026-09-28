@@ -60,11 +60,20 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 | Back / forward one sentence | `←` / `→`, ⟲ / ⟳ buttons |
 | Speed −/+ 25 WPM (works while playing) | `↓` / `↑`, − / + buttons |
 | Seek | Draggable progress bar |
+| Words per flash (1–3) | `1` / `2` / `3`, "N words" button |
 
 - Remaining time ("4 min left") shown, computed from current WPM.
 - When paused, the surrounding sentence is shown faintly around the word for context.
 - **Auto-rewind on resume:** resuming jumps back to the start of the current sentence.
 - On mobile, controls fade while playing and return on pause.
+
+## Words per flash
+
+- 1, 2 or 3 words per flash; default 1, remembered in `localStorage`.
+- A chunk never runs past a clause, sentence or paragraph end, and stays within 18 characters, so pauses and sentence navigation are unchanged.
+- A chunk is shown for the sum of its words' durations, so WPM stays the real average rate.
+- Multi-word chunks pivot about 30% of the way in (never on a space) and use a smaller font; the saved position stays a word index, so resuming works across chunk sizes.
+- Any word or chunk that would overflow its side of the frame is scaled down to fit.
 
 ## Screen sleep and backgrounding
 
@@ -96,5 +105,4 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 
 - EPUB import
 - Browser extension reusing the reader core
-- Chunking mode (1–3 words per flash)
 - CJK support via `Intl.Segmenter`

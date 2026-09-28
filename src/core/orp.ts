@@ -14,9 +14,20 @@ export function orpIndex(word: string): number {
   return first + pivotForLength(last - first + 1)
 }
 
-export function splitAtPivot(word: string): PivotSplit {
-  const chars = Array.from(word)
-  const index = orpIndex(word)
+const PHRASE_PIVOT_RATIO = 0.3
+
+// Multi-word chunks fixate about a third of the way in, like a single word's ORP, but the
+// word-length table doesn't extend sensibly past one word.
+export function phrasePivotIndex(phrase: string): number {
+  const chars = Array.from(phrase)
+  let index = Math.round(chars.length * PHRASE_PIVOT_RATIO)
+  while (index < chars.length - 1 && !LETTER.test(chars[index])) index++
+  return index
+}
+
+export function splitAtPivot(text: string): PivotSplit {
+  const chars = Array.from(text)
+  const index = text.includes(' ') ? phrasePivotIndex(text) : orpIndex(text)
   return {
     before: chars.slice(0, index).join(''),
     pivot: chars[index] ?? '',

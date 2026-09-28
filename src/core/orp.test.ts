@@ -35,3 +35,13 @@ describe('splitAtPivot', () => {
     expect(splitAtPivot('𝒜bc')).toEqual({ before: '𝒜', pivot: 'b', after: 'c' })
   })
 })
+
+describe('splitAtPivot for multi-word chunks', () => {
+  it('pivots about a third of the way into the phrase', () => {
+    expect(splitAtPivot('the quick fox')).toEqual({ before: 'the ', pivot: 'q', after: 'uick fox' })
+  })
+
+  it('never pivots on a space', () => {
+    expect(splitAtPivot('in a box').pivot).not.toBe(' ')
+  })
+})

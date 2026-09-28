@@ -56,3 +56,21 @@ test('explains that shared links are not supported', async ({ page }) => {
   await page.goto('./?url=https%3A%2F%2Fexample.com%2Farticle')
   await expect(page.getByRole('status')).toHaveText(/Links can't be opened yet/)
 })
+
+test('shows several words per flash and remembers the setting', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, 'One two three four, five six seven.')
+  await expect(page.locator('.frame')).toHaveText('One')
+
+  await page.keyboard.press('2')
+  await expect(page.locator('.frame')).toHaveText('One two')
+  await expect(page.getByRole('button', { name: 'Words per flash' })).toHaveText('2 words')
+  await expect(page.locator('.context .current')).toHaveText(['One', 'two'])
+
+  await page.getByRole('button', { name: 'Words per flash' }).click()
+  await expect(page.locator('.frame')).toHaveText('One two three')
+
+  await page.reload()
+  await pasteAndRead(page, 'Alpha beta gamma delta.')
+  await expect(page.locator('.frame')).toHaveText('Alpha beta gamma')
+})
