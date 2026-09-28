@@ -3,6 +3,7 @@
   import { titleFromText, type NewDocument } from './core/document'
   import { parseShare } from './core/share'
   import { tokenize, type Token } from './core/tokenize'
+  import { applyAppearance, loadAppearance, saveAppearance, type Appearance } from './lib/appearance'
   import Home from './lib/Home.svelte'
   import { openLibrary, type LibraryDocument } from './lib/library'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
@@ -20,6 +21,13 @@
   let storageAvailable = $state(true)
   let reading = $state<Reading | null>(null)
   let notice = $state('')
+  let appearance = $state(loadAppearance())
+
+  function changeAppearance(next: Appearance) {
+    appearance = next
+    saveAppearance(next)
+    applyAppearance(next)
+  }
 
   async function refresh() {
     try {
@@ -82,12 +90,23 @@
       <Reader
         tokens={reading.tokens}
         startIndex={reading.position}
+        {appearance}
+        onAppearanceChange={changeAppearance}
         onProgress={saveProgress}
         onExit={exit}
       />
     {/key}
   {:else}
-    <Home {documents} {storageAvailable} {notice} onAdd={add} onOpen={open} onRemove={remove} />
+    <Home
+      {documents}
+      {storageAvailable}
+      {notice}
+      {appearance}
+      onAppearanceChange={changeAppearance}
+      onAdd={add}
+      onOpen={open}
+      onRemove={remove}
+    />
   {/if}
 </main>
 

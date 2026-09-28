@@ -5,6 +5,8 @@
   import { sentenceEnd, sentenceStart } from '../core/navigation'
   import { MAX_CHUNK_SIZE, MAX_WPM, MIN_WPM, Player } from '../core/player'
   import type { Token } from '../core/tokenize'
+  import type { Appearance } from './appearance'
+  import AppearanceSettings from './AppearanceSettings.svelte'
   import { loadChunkSize, loadWpm, saveChunkSize, saveWpm } from './settings'
   import { createWakeLock } from './wakeLock'
   import WordDisplay from './WordDisplay.svelte'
@@ -12,11 +14,15 @@
   let {
     tokens,
     startIndex = 0,
+    appearance,
+    onAppearanceChange,
     onProgress = () => {},
     onExit,
   }: {
     tokens: Token[]
     startIndex?: number
+    appearance: Appearance
+    onAppearanceChange: (appearance: Appearance) => void
     onProgress?: (index: number) => void
     onExit: () => void
   } = $props()
@@ -32,6 +38,7 @@
   const initialChunkSize = loadChunkSize()
   let chunkSize = $state(initialChunkSize)
   let remaining = $state(0)
+  let showAppearance = $state(false)
 
   let lastSavedAt = 0
 
@@ -178,7 +185,7 @@
 
 <div class="reader" class:playing>
   <button class="stage" onclick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
-    <WordDisplay {word} />
+    <WordDisplay {word} {appearance} />
     <p class="context" aria-hidden={playing}>
       {#each context as token, i (contextOffset + i)}
         {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
@@ -199,6 +206,9 @@
       oninput={seek}
       aria-label="Position"
     />
+    {#if showAppearance}
+      <AppearanceSettings {appearance} onChange={onAppearanceChange} />
+    {/if}
     <div class="row">
       <button onclick={exit} aria-label="New text">✕</button>
       <span class="remaining">{finished ? 'Done' : formatRemaining(remaining)}</span>
@@ -215,6 +225,11 @@
       <button class="chunk-size" onclick={cycleChunkSize} aria-label="Words per flash">
         {chunkSize} {chunkSize === 1 ? 'word' : 'words'}
       </button>
+      <button
+        onclick={() => (showAppearance = !showAppearance)}
+        aria-label="Display settings"
+        aria-expanded={showAppearance}>Aa</button
+      >
     </div>
   </div>
 </div>
@@ -248,6 +263,7 @@
     min-height: 4.5em;
     margin: 1rem 0 0;
     color: var(--muted);
+    font-family: var(--reading-font);
     line-height: 1.5;
     transition: opacity 150ms;
   }

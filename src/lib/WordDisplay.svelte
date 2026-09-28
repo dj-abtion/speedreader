@@ -1,7 +1,8 @@
 <script lang="ts">
   import { splitAtPivot } from '../core/orp'
+  import type { Appearance } from './appearance'
 
-  let { word }: { word: string } = $props()
+  let { word, appearance }: { word: string; appearance: Appearance } = $props()
 
   let parts = $derived(splitAtPivot(word))
   let phrase = $derived(word.includes(' '))
@@ -11,8 +12,11 @@
   let after: HTMLSpanElement
 
   // Shrinks the text just enough that neither side spills past its column, so wide chunks and
-  // large font sizes never push the pivot off its fixed position.
+  // large font sizes never push the pivot off its fixed position. A new font or size changes the
+  // text's width, so it needs a fresh fit too.
   $effect(() => {
+    void appearance.font
+    void appearance.size
     if (!word) return
     frame.style.setProperty('--fit', '1')
     const scale = Math.min(1, fitRatio(before), fitRatio(after))
@@ -41,6 +45,7 @@
     align-items: baseline;
     width: 100%;
     padding: 0.5em 0;
+    font-family: var(--reading-font);
     font-size: calc(var(--word-size) * var(--fit, 1));
     line-height: 1.2;
     white-space: pre;
