@@ -112,7 +112,10 @@
         <rect x="248" y="360" width="16" height="60" rx="8" class="guide" />
         <path d="M166 262 L230 324 L350 196" class="tick" />
       </svg>
-      <h1>di<span class="pivot">d</span>read</h1>
+      <div class="name">
+        <h1>di<span class="pivot">d</span>read</h1>
+        <p class="tagline">Too long? Did read.</p>
+      </div>
     </div>
     <button
       class="round"
@@ -249,8 +252,8 @@
   }
 
   .logo {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3.25rem;
+    height: 3.25rem;
   }
 
   .logo .tile {
@@ -284,6 +287,18 @@
 
   .pivot {
     color: var(--accent);
+  }
+
+  .name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .tagline {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
   }
 
   .round {

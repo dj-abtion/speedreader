@@ -33,7 +33,7 @@ export default defineConfig({
       manifest: {
         name: 'Didread',
         short_name: 'Didread',
-        description: 'Read faster, one word at a time.',
+        description: 'Too long? Did read. Read faster, one word at a time.',
         start_url: base,
         scope: base,
         display: 'standalone',
