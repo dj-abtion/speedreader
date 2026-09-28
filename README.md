@@ -8,6 +8,7 @@ An installable, offline-capable RSVP speed reader. See [SPEC.md](SPEC.md) for th
 npm install
 npm run dev     # start the dev server
 npm test        # unit tests (Vitest)
+npm run lint    # lint (ESLint)
 npm run check   # typecheck
 npm run build   # production build to dist/
 npm run test:e2e  # end-to-end tests (Playwright)
