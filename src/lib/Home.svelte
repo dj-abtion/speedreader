@@ -1,6 +1,7 @@
 <script lang="ts">
   import { textFromFile, type NewDocument } from '../core/document'
   import type { LibraryDocument } from './library'
+  import { buildInfo, formatVersion, REPOSITORY_URL } from './version'
 
   let {
     documents,
@@ -91,6 +92,16 @@
       </ul>
     </section>
   {/if}
+
+  <footer class="version">
+    {#if buildInfo.commit}
+      <a href={`${REPOSITORY_URL}/commit/${buildInfo.commit}`} target="_blank" rel="noreferrer"
+        >{formatVersion(buildInfo)}</a
+      >
+    {:else}
+      {formatVersion(buildInfo)}
+    {/if}
+  </footer>
 </div>
 
 <style>
@@ -191,6 +202,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .version {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .version a {
+    color: inherit;
   }
 
   .progress {

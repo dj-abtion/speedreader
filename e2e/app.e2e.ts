@@ -106,3 +106,12 @@ test('shows several words per flash and remembers the setting', async ({ page })
   await pasteAndRead(page, 'Alpha beta gamma delta.')
   await expect(page.locator('.frame')).toHaveText('Alpha beta gamma')
 })
+
+test('shows the build version on the home screen', async ({ page }) => {
+  await page.goto('./')
+  await expect(page.locator('footer.version')).toHaveText(/^Version [0-9a-f]{7} · \d{1,2} [A-Z][a-z]{2} \d{4}$/)
+  await expect(page.locator('footer.version a')).toHaveAttribute(
+    'href',
+    /^https:\/\/github\.com\/dj-abtion\/speedreader\/commit\/[0-9a-f]{40}$/,
+  )
+})
