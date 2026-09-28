@@ -26,3 +26,6 @@ dist-ssr
 # Playwright
 test-results
 playwright-report
+
+# Skill zip built for upload to claude.ai
+plugins/speedread/skills/*.zip
