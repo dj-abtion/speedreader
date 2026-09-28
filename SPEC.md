@@ -1,4 +1,4 @@
-# Speedreader — v1 spec
+# Didread — v1 spec
 
 An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a time at a fixed focal point, with the optimal recognition point (ORP) letter highlighted so the eye never moves.
 

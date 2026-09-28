@@ -1,6 +1,6 @@
 {
   "name": "speedreader",
-  "description": "Claude Code plugins for Speedreader, the RSVP speed reader.",
+  "description": "Claude Code plugins for Didread, the RSVP speed reader.",
   "owner": {
     "name": "dj-abtion"
   },
@@ -8,7 +8,7 @@
     {
       "name": "speedread",
       "source": "./plugins/speedread",
-      "description": "Turn Claude's previous reply into a one-tap Speedreader link."
+      "description": "Turn Claude's previous reply into a one-tap Didread link."
     }
   ]
 }

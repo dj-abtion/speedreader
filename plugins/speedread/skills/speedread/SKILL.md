@@ -1,13 +1,13 @@
 ---
 name: speedread
-description: Turns Claude's previous reply into a one-tap Speedreader link, for reading long answers quickly one word at a time (RSVP). Use when the user types /speedread, or asks to speed-read, "speedread that", or read a reply in Speedreader. Takes an optional number of replies to go back (default 1).
+description: Turns Claude's previous reply into a one-tap Didread link, for reading long answers quickly one word at a time (RSVP). Use when the user types /speedread, or asks to speed-read, "speedread that", or read a reply in Didread. Takes an optional number of replies to go back (default 1).
 argument-hint: "[replies back, default 1]"
 allowed-tools: Bash(node:*)
 ---
 
 # Speedread
 
-Give the user a link that opens a reply in Speedreader (https://dj-abtion.github.io/speedreader/). The whole text travels inside the link's `#` fragment, which is never sent to a server.
+Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/speedreader/). The whole text travels inside the link's `#` fragment, which is never sent to a server.
 
 ## Steps
 

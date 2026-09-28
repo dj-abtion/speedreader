@@ -87,7 +87,7 @@
 </script>
 
 <div class="home">
-  <h1>Speedreader</h1>
+  <h1>Didread</h1>
 
   {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 

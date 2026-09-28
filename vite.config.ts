@@ -31,8 +31,8 @@ export default defineConfig({
       filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Speedreader',
-        short_name: 'Speedreader',
+        name: 'Didread',
+        short_name: 'Didread',
         description: 'Read faster, one word at a time.',
         start_url: base,
         scope: base,
