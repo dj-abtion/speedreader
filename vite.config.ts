@@ -12,6 +12,9 @@ export default defineConfig({
     svelte(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'sw',
+      filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Speedreader',
@@ -27,15 +30,17 @@ export default defineConfig({
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
           { src: 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        // POST keeps shared text out of URLs (and so out of history and server logs); the
+        // service worker answers it on the device.
         share_target: {
-          action: base,
-          method: 'GET',
+          action: `${base}share`,
+          method: 'POST',
+          enctype: 'multipart/form-data',
           params: { title: 'title', text: 'text', url: 'url' },
         },
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
-        navigateFallback: `${base}index.html`,
       },
     }),
   ],

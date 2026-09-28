@@ -11,7 +11,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 
 - Paste text into a textarea.
 - Open a `.txt` or `.md` file.
-- Web Share Target: share text to the installed app (Android; iOS Safari does not support share targets).
+- Web Share Target: share text to the installed app (Android; iOS Safari does not support share targets). Shares use POST and are answered by the service worker on the device, which parks the text in Cache Storage and opens the app with only a `?shared` flag, so shared text never appears in a URL, browser history or server logs.
 - **Not in v1:** URL / article fetching. Browsers cannot fetch arbitrary pages (CORS) without a proxy, which would break "no backend". A shared bare URL shows a friendly "not supported" message.
 - Markdown is stripped to plain text before tokenizing.
 
