@@ -1,4 +1,6 @@
 import { mount } from 'svelte'
+import '@fontsource-variable/bricolage-grotesque/wght.css'
+import '@fontsource-variable/figtree/wght.css'
 import './app.css'
 import App from './App.svelte'
 import { applyAppearance, loadAppearance } from './lib/appearance'

@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { openLibrary, type Library } from './library'
+import { isFinished, openLibrary, type Library } from './library'
 
 let library: Library
 let dbCounter = 0
@@ -25,16 +25,25 @@ describe('library', () => {
     expect((await library.list()).map((d) => d.id)).toEqual([first.id, second.id])
   })
 
-  it('saves the reading position', async () => {
+  it('saves the reading position and reading time', async () => {
     const doc = await library.add({ title: 'Tale', text: 'a b c d' })
-    await library.savePosition(doc.id, 3)
-    expect((await library.get(doc.id))?.position).toBe(3)
+    await library.saveProgress(doc.id, 2, 1500)
+    expect(await library.get(doc.id)).toMatchObject({ position: 2, readingMs: 1500 })
+  })
+
+  it('marks a document finished at its last word', async () => {
+    const doc = await library.add({ title: 'Tale', text: 'a b c d' })
+    expect(isFinished(doc)).toBe(false)
+    await library.markFinished(doc.id, 2000)
+    const finished = await library.get(doc.id)
+    expect(finished).toMatchObject({ position: 3, readingMs: 2000, finishedAt: expect.any(Number) })
+    expect(isFinished(finished!)).toBe(true)
   })
 
   it('ignores position updates for deleted documents', async () => {
     const doc = await library.add({ title: 'Tale', text: 'a b c' })
     await library.remove(doc.id)
-    await library.savePosition(doc.id, 2)
+    await library.saveProgress(doc.id, 2, 0)
     expect(await library.get(doc.id)).toBeUndefined()
     expect(await library.list()).toEqual([])
   })

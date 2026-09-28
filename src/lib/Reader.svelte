@@ -17,13 +17,16 @@
     appearance,
     onAppearanceChange,
     onProgress = () => {},
+    onFinish = () => {},
     onExit,
   }: {
     tokens: Token[]
     startIndex?: number
     appearance: Appearance
     onAppearanceChange: (appearance: Appearance) => void
-    onProgress?: (index: number) => void
+    // Reading time is the time spent playing since this reader opened.
+    onProgress?: (index: number, readingMs: number) => void
+    onFinish?: (readingMs: number) => void
     onExit: () => void
   } = $props()
 
@@ -41,6 +44,12 @@
   let showAppearance = $state(false)
 
   let lastSavedAt = 0
+  let playedMs = 0
+  let playingSince: number | null = null
+
+  function readingMs(): number {
+    return playedMs + (playingSince === null ? 0 : performance.now() - playingSince)
+  }
 
   // Tokens and start position are fixed for the lifetime of this component; a new text
   // mounts a new Reader.
@@ -60,6 +69,7 @@
     onEnd: () => {
       finished = true
       sync()
+      onFinish(readingMs())
     },
   })
 
@@ -78,8 +88,11 @@
     wpm = player.wpm
     remaining = player.remainingMs
     if (playing) {
+      playingSince ??= performance.now()
       wakeLock.acquire()
     } else {
+      if (playingSince !== null) playedMs += performance.now() - playingSince
+      playingSince = null
       wakeLock.release()
       saveProgress()
     }
@@ -89,7 +102,7 @@
   // size it was read at.
   function saveProgress() {
     lastSavedAt = Date.now()
-    onProgress(finished ? tokens.length - 1 : player.index)
+    onProgress(finished ? tokens.length - 1 : player.index, readingMs())
   }
 
   function toggle() {

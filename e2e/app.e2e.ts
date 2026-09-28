@@ -8,6 +8,7 @@ const story = [
 ].join('\n')
 
 async function pasteAndRead(page: Page, text: string) {
+  await page.getByRole('button', { name: 'Paste text' }).click()
   await page.getByLabel('Paste the text you want to read').fill(text)
   await page.getByRole('button', { name: 'Read', exact: true }).click()
   await expect(page.locator('.frame')).toBeVisible()
@@ -26,7 +27,7 @@ test('resumes reading at the same sentence after a reload', async ({ page }) => 
   // Returning to the library waits for the saved position; a reload in the same instant as the
   // pause can cancel the in-flight IndexedDB write, which the spec accepts as losing a few seconds.
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('button', { name: /^A Long Story/ })).not.toContainText('0%')
+  await expect(page.getByRole('button', { name: /^A Long Story/ })).not.toContainText('Not started')
   await page.reload()
   await page.getByRole('button', { name: /^A Long Story/ }).click()
   await expect(page.locator('.context')).toHaveText(sentence)
@@ -129,8 +130,8 @@ test('remembers the chosen theme, font and size', async ({ page }) => {
   await page.getByLabel('XL').check()
 
   await page.reload()
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(18, 18, 18)')
-  await page.getByText('Display').click()
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(20, 19, 17)')
+  await page.getByRole('button', { name: 'Display settings' }).click()
   await expect(page.getByLabel('Dark')).toBeChecked()
   await page.getByRole('button', { name: /^Short words/ }).click()
   const frame = page.locator('.frame')
@@ -151,7 +152,7 @@ test('opens a reader link and keeps its text out of the URL', async ({ page }) =
   await page.keyboard.press('Space')
   await page.keyboard.press('Escape')
   const saved = page.getByRole('button', { name: /^Short answer/ })
-  await expect(saved).not.toContainText('0%')
+  await expect(saved).not.toContainText('Not started')
 
   // Opening the same link again resumes the saved copy instead of adding another.
   await page.goto(link)
@@ -186,4 +187,17 @@ test('opens a reader link copied to the clipboard', async ({ page, context }) =>
   await page.evaluate((text) => navigator.clipboard.writeText(text), link)
   await page.getByRole('button', { name: 'Read clipboard' }).click()
   await expect(page.locator('.frame')).toHaveText('Linked')
+})
+
+test('celebrates a finished text and stamps it in the library', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, 'Four short words.')
+  await page.keyboard.press('Space')
+
+  await expect(page.getByRole('heading', { name: 'Did read' })).toBeVisible({ timeout: 10_000 })
+  await expect(page.locator('dl')).toContainText('words 3')
+  await page.getByRole('button', { name: 'Library' }).click()
+
+  const card = page.getByRole('button', { name: /^Four short words/ })
+  await expect(card).toContainText('Did read')
 })

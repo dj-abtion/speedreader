@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatRemaining } from './format'
+import { formatClock, formatCount, formatDuration, formatRemaining } from './format'
 
 describe('formatRemaining', () => {
   it('shows seconds under a minute', () => {
@@ -16,5 +16,28 @@ describe('formatRemaining', () => {
   it('shows hours and minutes from one hour', () => {
     expect(formatRemaining(3_600_000)).toBe('1 h left')
     expect(formatRemaining(5_430_000)).toBe('1 h 31 min left')
+  })
+})
+
+describe('formatDuration', () => {
+  it('shows seconds, minutes and seconds, or hours and minutes', () => {
+    expect(formatDuration(55_200)).toBe('55 s')
+    expect(formatDuration(120_000)).toBe('2 min')
+    expect(formatDuration(148_000)).toBe('2 min 28 s')
+    expect(formatDuration(3_600_000)).toBe('1 h')
+    expect(formatDuration(6_720_000)).toBe('1 h 52 min')
+  })
+})
+
+describe('formatClock', () => {
+  it('shows minutes and zero-padded seconds', () => {
+    expect(formatClock(165_000)).toBe('2:45')
+    expect(formatClock(5_000)).toBe('0:05')
+  })
+})
+
+describe('formatCount', () => {
+  it('groups thousands', () => {
+    expect(formatCount(1240)).toBe('1,240')
   })
 })
