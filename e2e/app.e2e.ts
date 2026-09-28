@@ -213,3 +213,17 @@ test('confirms a speed change made while playing', async ({ page }) => {
   await expect(page.locator('.wpm')).toHaveText('325 wpm')
   await expect(page.getByText('Tap anywhere to resume')).toBeVisible()
 })
+
+test('stops on a code block and shows the code until reading continues', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, 'Run this:\n\n```sh\nnpm run build\nnpm test\n```\n\nAfter the code.')
+  await page.keyboard.press('Space')
+
+  const code = page.getByRole('region', { name: 'Code block' })
+  await expect(code).toContainText('npm run build\nnpm test', { timeout: 10_000 })
+  await expect(code).toContainText('sh')
+  await expect(page.locator('.frame')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Continue reading' }).click()
+  await expect(page.locator('.frame')).toHaveText(/After|the|code\./)
+})

@@ -70,6 +70,7 @@
       remaining = player.remainingMs
       if (Date.now() - lastSavedAt >= SAVE_INTERVAL_MS) saveProgress()
     },
+    onStop: sync,
     onEnd: () => {
       finished = true
       sync()
@@ -79,6 +80,8 @@
 
   let chunk = $state(player.chunk)
   let word = $derived(chunkText(tokens, chunk))
+  let code = $derived(tokens[chunk.start]?.code)
+  let codeLines = $derived(code ? code.source.split('\n').length : 0)
   let context = $derived(
     tokens.slice(sentenceStart(tokens, index), sentenceEnd(tokens, index) + 1),
   )
@@ -234,20 +237,31 @@
     </div>
   {/if}
 
-  <button class="stage" onclick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
-    <WordDisplay {word} {appearance} />
-    <p class="context" aria-hidden={playing}>
-      {#each context as token, i (contextOffset + i)}
-        {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
-        <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
-        <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
-        <span class:current>{token.text}</span>{' '}
-      {/each}
-    </p>
-    <span class="hint" aria-hidden="true">
-      {finished ? 'Tap anywhere to read again' : started ? 'Tap anywhere to resume' : 'Tap anywhere to start'}
-    </span>
-  </button>
+  {#if code}
+    <section class="code" aria-label="Code block">
+      <div class="code-head">
+        <span>{code.language || 'Code'}</span>
+        <span>{codeLines} {codeLines === 1 ? 'line' : 'lines'}</span>
+      </div>
+      <pre><code>{code.source}</code></pre>
+      <button class="continue" onclick={toggle}>Continue reading</button>
+    </section>
+  {:else}
+    <button class="stage" onclick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
+      <WordDisplay {word} {appearance} />
+      <p class="context" aria-hidden={playing}>
+        {#each context as token, i (contextOffset + i)}
+          {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
+          <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
+          <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
+          <span class:current>{token.text}</span>{' '}
+        {/each}
+      </p>
+      <span class="hint" aria-hidden="true">
+        {finished ? 'Tap anywhere to read again' : started ? 'Tap anywhere to resume' : 'Tap anywhere to start'}
+      </span>
+    </button>
+  {/if}
 
   {#if bubble}
     <div class="bubble" role="status">{bubble}</div>
@@ -391,6 +405,47 @@
     color: var(--text);
     text-decoration: underline;
     text-decoration-color: var(--accent);
+  }
+
+  .code {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: min(44rem, 100%);
+    min-height: 0;
+    align-self: center;
+    padding: 1.5rem 1rem 1rem;
+    box-sizing: border-box;
+  }
+
+  .code-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Long code scrolls inside the panel so the controls stay put. */
+  pre {
+    flex: 1 1 0;
+    min-height: 8rem;
+    margin: 0;
+    padding: 1rem;
+    overflow: auto;
+    border-radius: 0.9rem;
+    background: var(--surface);
+    font: 0.9rem/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    tab-size: 2;
+  }
+
+  .continue {
+    min-height: 3rem;
+    border-radius: 0.9rem;
+    font-weight: 600;
   }
 
   .hint {

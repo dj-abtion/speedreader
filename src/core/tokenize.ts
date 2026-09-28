@@ -1,8 +1,12 @@
+import { CODE_BLOCK, CODE_BLOCK_LABEL, type CodeBlock } from './code'
+
 export interface Token {
   text: string
   endsSentence: boolean
   endsClause: boolean
   endsParagraph: boolean
+  // A code block reads as one placeholder token that carries the code to show instead.
+  code?: CodeBlock
 }
 
 export const MAX_TOKEN_LENGTH = 13
@@ -21,6 +25,23 @@ const ABBREVIATIONS = new Set([
 ])
 
 export function tokenize(text: string): Token[] {
+  const tokens: Token[] = []
+  let proseStart = 0
+  for (const match of text.matchAll(CODE_BLOCK)) {
+    tokens.push(...tokenizeProse(text.slice(proseStart, match.index)), {
+      text: CODE_BLOCK_LABEL,
+      endsSentence: true,
+      endsClause: false,
+      endsParagraph: true,
+      code: { language: match[1], source: match[2] },
+    })
+    proseStart = match.index + match[0].length
+  }
+  tokens.push(...tokenizeProse(text.slice(proseStart)))
+  return tokens
+}
+
+function tokenizeProse(text: string): Token[] {
   return text
     .split(/\n\s*\n/)
     .flatMap((paragraph) => {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { encodeCodeBlock } from './code'
 import { Player, type Clock } from './player'
 import { tokenize } from './tokenize'
 import { durations, RAMP_MS, weights } from './timing'
@@ -209,5 +210,26 @@ describe('Player', () => {
       player.seek(1)
       expect(player.atLastChunk).toBe(false)
     })
+  })
+})
+
+describe('Player at a code block', () => {
+  const tokens = tokenize(`One two.\n\n${encodeCodeBlock({ language: '', source: 'x = 1' })}\n\nThree four.`)
+
+  it('stops on the code block and plays on past it', () => {
+    const clock = new FakeClock()
+    let stops = 0
+    const player = new Player({ tokens, wpm: 300, clock, onStop: () => stops++ })
+
+    player.play()
+    clock.advance(5000)
+    expect(stops).toBe(1)
+    expect(player.playing).toBe(false)
+    expect(player.atCode).toBe(true)
+    expect(clock.hasPendingFrame).toBe(false)
+
+    player.play()
+    expect(player.atCode).toBe(false)
+    expect(tokens[player.index].text).toBe('Three')
   })
 })

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { encodeCodeBlock } from './code'
 import { tokenize } from './tokenize'
 
 const texts = (input: string) => tokenize(input).map((t) => t.text)
@@ -78,5 +79,14 @@ describe('tokenize', () => {
   it('never produces a token longer than 13 characters', () => {
     const tokens = tokenize('https://example.com/a/very/long/path?query=1 supercalifragilisticexpialidocious')
     for (const token of tokens) expect(token.text.length).toBeLessThanOrEqual(13)
+  })
+})
+
+describe('code blocks', () => {
+  it('reads a code block as one placeholder token between paragraphs', () => {
+    const tokens = tokenize(`Before it\n\n${encodeCodeBlock({ language: 'ts', source: 'const a = 1\n\nlet b' })}\n\nAfter`)
+    expect(tokens.map((t) => t.text)).toEqual(['Before', 'it', '(code block)', 'After'])
+    expect(tokens[1].endsParagraph).toBe(true)
+    expect(tokens[2]).toMatchObject({ endsParagraph: true, code: { language: 'ts', source: 'const a = 1\n\nlet b' } })
   })
 })

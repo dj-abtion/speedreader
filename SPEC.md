@@ -17,7 +17,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 - The `/speedread` Claude Code skill (`plugins/speedread/`) makes reader links from Claude replies. Its script reads the session transcript (`~/.claude/projects/*/<CLAUDE_CODE_SESSION_ID>.jsonl`) and takes the last finished reply before the current prompt: the assistant text after that turn's last tool call. Turns that asked for a link (a `/speedread` prompt, or a reply containing a speed-read link) are skipped when counting back. It compresses the reply with Node's `zlib.deflateRawSync`, which must stay byte-compatible with `decodeText`; a unit test enforces this.
 - **Not in v1:** URL / article fetching. Browsers cannot fetch arbitrary pages (CORS) without a proxy, which would break "no backend". A shared bare URL shows a friendly "not supported" message.
 - Markdown is stripped to plain text before tokenizing: always for `.md` files, and for pasted, shared, clipboard and linked text when it clearly looks like Markdown (headings, fences, bold, links, inline code, tables or a list), so plain prose is left alone.
-  - A fenced code block reads as a single "(code block)" placeholder.
+  - A fenced code block reads as a single "(code block)" placeholder. The code itself is kept in the text between two private-use characters (U+E000, then the language and a newline, then the code, then U+E001), so it survives storage and links. Reaching the placeholder stops playback and shows the code, with its language and line count, in a scrolling panel. "Continue reading", play or `Space` carries on after the block.
   - A heading becomes its own paragraph.
   - List items and table rows (cells joined by dashes) that don't end in punctuation get a clause pause.
 

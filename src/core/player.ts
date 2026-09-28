@@ -28,6 +28,8 @@ export interface PlayerOptions {
   clock?: Clock
   onTick?: (index: number) => void
   onEnd?: () => void
+  // Called when playback stops by itself on a code block, which needs reading at its own pace.
+  onStop?: () => void
 }
 
 // Drives playback from elapsed wall-clock time rather than chained timeouts,
@@ -47,6 +49,7 @@ export class Player {
   private readonly clock: Clock
   private readonly onTick: (index: number) => void
   private readonly onEnd: () => void
+  private readonly onStop: () => void
   private frameId: number | null = null
   private startedAt = 0
   private nextAt = 0
@@ -59,6 +62,7 @@ export class Player {
     clock = browserClock,
     onTick,
     onEnd,
+    onStop,
   }: PlayerOptions) {
     this.tokens = tokens
     this.chunkSize = clampChunkSize(chunkSize)
@@ -69,6 +73,7 @@ export class Player {
     this.clock = clock
     this.onTick = onTick ?? (() => {})
     this.onEnd = onEnd ?? (() => {})
+    this.onStop = onStop ?? (() => {})
     this.moveTo(position)
   }
 
@@ -80,6 +85,10 @@ export class Player {
     return this.chunkIndex === this.chunks.length - 1
   }
 
+  get atCode(): boolean {
+    return this.tokens[this.chunk.start]?.code !== undefined
+  }
+
   get remainingMs(): number {
     return remainingMs(this.durations, this.index)
   }
@@ -87,6 +96,8 @@ export class Player {
   play(): void {
     if (this.playing || this.tokens.length === 0) return
     this.moveTo(sentenceStart(this.tokens, this.index))
+    // Playing on from a code block means the reader is done with it.
+    if (this.atCode && !this.atLastChunk) this.moveTo(this.chunks[this.chunkIndex + 1].start)
     this.playing = true
     this.startedAt = this.clock.now()
     this.nextAt = this.startedAt + this.currentDuration()
@@ -144,6 +155,12 @@ export class Player {
       }
       this.chunkIndex++
       this.index = this.chunk.start
+      if (this.atCode) {
+        this.onTick(this.index)
+        this.pause()
+        this.onStop()
+        return
+      }
       this.nextAt += this.currentDuration(this.nextAt)
     }
     if (this.index !== startIndex) this.onTick(this.index)
