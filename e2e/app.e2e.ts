@@ -201,3 +201,15 @@ test('celebrates a finished text and stamps it in the library', async ({ page })
   const card = page.getByRole('button', { name: /^Four short words/ })
   await expect(card).toContainText('Did read')
 })
+
+test('confirms a speed change made while playing', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, story)
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowUp')
+  await expect(page.getByRole('status')).toHaveText('325 wpm')
+
+  await page.keyboard.press('Space')
+  await expect(page.locator('.wpm')).toHaveText('325 wpm')
+  await expect(page.getByText('Tap anywhere to resume')).toBeVisible()
+})
