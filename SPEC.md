@@ -73,13 +73,15 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 | Action | Input |
 | --- | --- |
 | Play / pause | Tap anywhere, `Space` |
-| Back / forward one sentence | `←` / `→`, ⟲ / ⟳ buttons |
+| Back / forward one sentence | `←` / `→`, « / » buttons |
 | Speed −/+ 25 WPM (works while playing) | `↓` / `↑`, − / + buttons |
-| Seek | Draggable progress bar |
+| Seek | Drag the thin progress line along the bottom edge |
 | Words per flash (1–3) | `1` / `2` / `3`, "N words" button |
 | Theme, font, size | "Aa" button |
+| Back to the library | `Esc`, ✕ button |
 
-- Remaining time ("4 min left") shown, computed from current WPM.
+- When paused, a large play button sits between the sentence buttons, with the speed and words-per-flash controls below and the percentage read and remaining time ("4 min left", from the current WPM) under those.
+- A speed or words-per-flash change made from the keyboard while playing is confirmed in a brief bubble, since the controls are hidden.
 - When paused, the surrounding sentence is shown faintly around the word for context.
 - **Auto-rewind on resume:** resuming jumps back to the start of the current sentence.
 - On mobile, controls fade while playing and return on pause.
