@@ -39,22 +39,40 @@ export function readerLink(text, appUrl = DEFAULT_APP_URL) {
 // A turn starts at each prompt: a user message that is neither a tool result nor injected
 // context such as an expanded skill. Its reply is the assistant text after the turn's last
 // tool call, which leaves out narration like "Now running the tests" between tool calls.
+// Turns that asked for a link are skipped, so "/speedread 2" right after "/speedread" still
+// means the reply before the first link, not the link itself.
 /**
  * @param {Entry[]} entries
  * @returns {string | null}
  */
 export function lastReply(entries, back = 1) {
-  /** @type {Block[][]} */
+  /** @type {{ prompt: string, blocks: Block[] }[]} */
   const turns = []
   for (const entry of entries) {
     if (entry.isSidechain) continue
     const turn = turns.at(-1)
-    if (isPrompt(entry)) turns.push([])
-    else if (entry.type === 'assistant' && turn) turn.push(...blocks(entry.message?.content))
+    if (isPrompt(entry)) turns.push({ prompt: promptText(entry), blocks: [] })
+    else if (entry.type === 'assistant' && turn) turn.blocks.push(...blocks(entry.message?.content))
   }
   // The last turn is the one that asked for the link, so it never counts.
-  const replies = turns.slice(0, -1).map(finalText).filter(Boolean)
+  const replies = turns
+    .slice(0, -1)
+    .filter((turn) => !SPEEDREAD_PROMPT.test(turn.prompt))
+    .map((turn) => finalText(turn.blocks))
+    .filter((reply) => reply && !LINK_REPLY.test(reply))
   return replies.at(-back) ?? null
+}
+
+// Typed as "/speedread 2", or expanded as <command-name>/speedread</command-name> once the
+// skill is installed, optionally namespaced by its plugin.
+const SPEEDREAD_PROMPT = /^\s*\/(speedread:)?speedread\b|<command-name>\/?(speedread:)?speedread<\/command-name>/
+const LINK_REPLY = /\[⚡ Speed-read this reply\]\(/
+
+/** @param {Entry} entry */
+function promptText(entry) {
+  return blocks(entry.message?.content)
+    .map((block) => (block.type === 'text' ? (block.text ?? '') : ''))
+    .join('\n')
 }
 
 /** @param {Entry} entry */

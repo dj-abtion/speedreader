@@ -57,6 +57,32 @@ describe('speedread link script', () => {
     expect(lastReply(entries, 3)).toBeNull()
   })
 
+  it('counts back from before earlier link requests', () => {
+    const linkReply = '[⚡ Speed-read this reply](https://example.com/#t=abc) · 3 words'
+    const entries = [
+      prompt('first'),
+      say('Reply one.'),
+      prompt('second'),
+      say('Reply two.'),
+      prompt('/speedread'),
+      toolCall(),
+      toolResult(),
+      say(linkReply),
+      prompt('<command-message>speedread</command-message>\n<command-name>/speedread</command-name>'),
+      say(linkReply),
+      prompt('speedread that please'),
+      say(`Here you go:\n\n${linkReply}`),
+      prompt('/speedread 2'),
+    ]
+    expect(lastReply(entries, 1)).toBe('Reply two.')
+    expect(lastReply(entries, 2)).toBe('Reply one.')
+  })
+
+  it('still counts replies to prompts that only mention the skill', () => {
+    const entries = [prompt('now do the /speedread skill'), say('Done, the skill is built.'), prompt('/speedread')]
+    expect(lastReply(entries)).toBe('Done, the skill is built.')
+  })
+
   it('ignores subagent messages and compaction summaries', () => {
     const entries = [
       prompt('question'),
