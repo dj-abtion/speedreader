@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount, untrack } from 'svelte'
   import { formatRemaining } from '../core/format'
   import { sentenceEnd, sentenceStart } from '../core/navigation'
   import { MAX_WPM, MIN_WPM, Player } from '../core/player'
@@ -32,14 +32,13 @@
 
   let lastSavedAt = 0
 
+  // Tokens and start position are fixed for the lifetime of this component; a new text
+  // mounts a new Reader.
+  const initial = untrack(() => ({ tokens, position: startIndex }))
+
   const wakeLock = createWakeLock()
   const player = new Player({
-    // Tokens and start position are fixed for the lifetime of this component; a new text
-    // mounts a new Reader.
-    // svelte-ignore state_referenced_locally
-    tokens,
-    // svelte-ignore state_referenced_locally
-    position: startIndex,
+    ...initial,
     wpm: initialWpm,
     onTick: (i) => {
       index = i
@@ -158,6 +157,8 @@
     <WordDisplay word={tokens[index]?.text ?? ''} />
     <p class="context" aria-hidden={playing}>
       {#each context as token, i (contextOffset + i)}
+        <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
+        <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
         <span class:current={contextOffset + i === index}>{token.text}</span>{' '}
       {/each}
     </p>
