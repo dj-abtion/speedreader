@@ -14,6 +14,10 @@ export default defineConfig(
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {
+    files: ['sw/**'],
+    languageOptions: { globals: globals.serviceworker },
+  },
+  {
     files: ['**/*.svelte', '**/*.svelte.ts'],
     languageOptions: {
       parserOptions: { parser: ts.parser, extraFileExtensions: ['.svelte'], svelteConfig },

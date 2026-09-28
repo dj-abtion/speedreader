@@ -43,7 +43,39 @@ test('loads offline after the first visit', async ({ page, context }) => {
   await expect(page.locator('.frame')).toHaveText('Reading')
 })
 
-test('opens shared text in the reader and saves it to the library', async ({ page }) => {
+test('handles shared text on the device without the network', async ({ page, context }) => {
+  await page.goto('./')
+  await page.evaluate(() => navigator.serviceWorker.ready)
+  await page.reload()
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
+
+  // Offline proves the service worker answers the share itself; nothing reaches a server.
+  await context.setOffline(true)
+  await page.evaluate(() => {
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.enctype = 'multipart/form-data'
+    form.action = 'share'
+    for (const [name, value] of [
+      ['title', 'Private note'],
+      ['text', 'Confidential words stay here.'],
+    ]) {
+      const input = document.createElement('input')
+      input.name = name
+      input.value = value
+      form.append(input)
+    }
+    document.body.append(form)
+    form.submit()
+  })
+
+  await expect(page.locator('.frame')).toHaveText('Confidential')
+  expect(page.url()).not.toContain('Confidential')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: /^Private note/ })).toBeVisible()
+})
+
+test('still accepts shares from the older GET share target', async ({ page }) => {
   await page.goto('./?title=Shared%20note&text=Shared%20words%20arrive%20here.')
   await expect(page.locator('.frame')).toHaveText('Shared')
   await expect(page).toHaveURL(/\/speedreader\/$/)

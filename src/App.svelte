@@ -5,6 +5,7 @@
   import { tokenize, type Token } from './core/tokenize'
   import Home from './lib/Home.svelte'
   import { openLibrary, type LibraryDocument } from './lib/library'
+  import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
 
   interface Reading {
@@ -58,8 +59,12 @@
     await refresh()
   }
 
+  // Shares normally arrive via the service worker's inbox with only a flag in the URL. Reading
+  // the query string too keeps shares working from installs still on the old GET share target.
   async function receiveShare() {
-    const share = parseShare(new URLSearchParams(location.search))
+    const query = new URLSearchParams(location.search)
+    const fields = query.has(SHARED_FLAG) ? await takeSharedFields() : null
+    const share = parseShare(fields ? new URLSearchParams({ ...fields }) : query)
     if (location.search) history.replaceState(null, '', location.pathname)
     if (share.kind === 'document') await add(share.document)
     if (share.kind === 'link') notice = "Links can't be opened yet. Share the text itself instead."
