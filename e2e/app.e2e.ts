@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { encodeText } from '../src/core/link'
+import { encodeText } from '../src/core/link.ts'
 
 const story = [
   'A Long Story',
