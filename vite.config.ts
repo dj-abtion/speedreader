@@ -1,4 +1,5 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { execSync } from 'node:child_process'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -6,8 +7,21 @@ import { VitePWA } from 'vite-plugin-pwa'
 // it exactly or the service worker and install prompt break.
 const base = '/speedreader/'
 
+// Baked into the bundle so the app can show which deploy is running.
+function git(args: string): string {
+  try {
+    return execSync(`git ${args}`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return ''
+  }
+}
+
 export default defineConfig({
   base,
+  define: {
+    'import.meta.env.VITE_APP_COMMIT': JSON.stringify(git('rev-parse HEAD')),
+    'import.meta.env.VITE_APP_COMMIT_DATE': JSON.stringify(git('log -1 --format=%cI')),
+  },
   plugins: [
     svelte(),
     VitePWA({
