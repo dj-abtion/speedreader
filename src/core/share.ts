@@ -1,4 +1,4 @@
-import type { NewDocument } from './document'
+import { readableText, type NewDocument } from './document'
 
 export type ShareResult =
   | { kind: 'none' }
@@ -14,7 +14,7 @@ export function parseShare(params: URLSearchParams): ShareResult {
   const text = params.get('text')?.trim() ?? ''
   const url = params.get('url')?.trim() ?? ''
 
-  if (text && !URL_ONLY.test(text)) return { kind: 'document', document: { title, text } }
+  if (text && !URL_ONLY.test(text)) return { kind: 'document', document: { title, text: readableText(text) } }
   if (text || url) return { kind: 'link' }
   return { kind: 'none' }
 }

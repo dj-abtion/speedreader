@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { textFromFile, type NewDocument } from '../core/document'
+  import { readableText, textFromFile, type NewDocument } from '../core/document'
+  import { payloadFromLink } from '../core/link'
+  import { parseShare } from '../core/share'
   import type { Appearance } from './appearance'
   import AppearanceSettings from './AppearanceSettings.svelte'
   import type { LibraryDocument } from './library'
@@ -12,6 +14,7 @@
     appearance,
     onAppearanceChange,
     onAdd,
+    onOpenLink,
     onOpen,
     onRemove,
   }: {
@@ -21,18 +24,41 @@
     appearance: Appearance
     onAppearanceChange: (appearance: Appearance) => void
     onAdd: (doc: NewDocument) => void
+    onOpenLink: (payload: string) => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
   } = $props()
 
+  const appUrl = `${location.origin}${import.meta.env.BASE_URL}`
+  const canReadClipboard = !!navigator.clipboard?.readText
+
   let text = $state('')
-  let fileError = $state('')
+  let inputError = $state('')
 
   function submit(event: SubmitEvent) {
     event.preventDefault()
     if (!text.trim()) return
-    onAdd({ title: '', text })
+    const payload = payloadFromLink(text, appUrl)
+    if (payload) onOpenLink(payload)
+    else onAdd({ title: '', text: readableText(text) })
     text = ''
+  }
+
+  async function readClipboard() {
+    inputError = ''
+    let clipboard: string
+    try {
+      clipboard = await navigator.clipboard.readText()
+    } catch {
+      inputError = "Couldn't read the clipboard. Paste into the box instead."
+      return
+    }
+    const payload = payloadFromLink(clipboard, appUrl)
+    if (payload) return onOpenLink(payload)
+    const share = parseShare(new URLSearchParams({ text: clipboard }))
+    if (share.kind === 'document') onAdd(share.document)
+    else if (share.kind === 'link') inputError = "Links can't be opened yet. Copy the text itself instead."
+    else inputError = 'The clipboard is empty.'
   }
 
   async function openFile(event: Event) {
@@ -40,13 +66,13 @@
     const file = input.files?.[0]
     input.value = ''
     if (!file) return
-    fileError = ''
+    inputError = ''
     try {
       const doc = textFromFile(file.name, await file.text())
       if (doc.text.trim()) onAdd(doc)
-      else fileError = `${file.name} is empty.`
+      else inputError = `${file.name} is empty.`
     } catch {
-      fileError = `Couldn't read ${file.name}.`
+      inputError = `Couldn't read ${file.name}.`
     }
   }
 
@@ -73,9 +99,12 @@
         Open file
         <input type="file" accept=".txt,.md,.markdown,text/plain,text/markdown" onchange={openFile} />
       </label>
+      {#if canReadClipboard}
+        <button type="button" class="clipboard" onclick={readClipboard}>Read clipboard</button>
+      {/if}
       <button type="submit" disabled={!text.trim()}>Read</button>
     </div>
-    {#if fileError}<p class="error" role="alert">{fileError}</p>{/if}
+    {#if inputError}<p class="error" role="alert">{inputError}</p>{/if}
   </form>
 
   {#if !storageAvailable}
@@ -155,6 +184,10 @@
     display: flex;
     justify-content: space-between;
     gap: 0.5rem;
+  }
+
+  .clipboard {
+    margin-left: auto;
   }
 
   .file {
