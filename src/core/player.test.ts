@@ -150,4 +150,64 @@ describe('Player', () => {
     player.play()
     expect(player.playing).toBe(false)
   })
+
+  describe('with several words per flash', () => {
+    it('reads a long text at 300 WPM in the same time as one word per flash', () => {
+      const tokens = tokenize(text)
+      let endedAt: number | null = null
+      const player = new Player({ tokens, wpm: 300, chunkSize: 3, clock, onEnd: () => (endedAt = clock.time) })
+      const expected = durations(weights(tokens), 300).reduce((a, b) => a + b, 0)
+
+      player.play()
+      clock.advance(expected + RAMP_MS + 1000)
+
+      expect(endedAt).not.toBeNull()
+      expect(endedAt!).toBeGreaterThanOrEqual(expected)
+      expect(endedAt! - expected).toBeLessThan(RAMP_MS)
+    })
+
+    it('advances a whole chunk at a time and exposes the current chunk', () => {
+      const seen: number[] = []
+      const player = new Player({ tokens: tokenize('a b c d e f'), wpm: 600, chunkSize: 2, clock, onTick: (i) => seen.push(i) })
+      expect(player.chunk).toEqual({ start: 0, end: 2 })
+      player.play()
+      clock.advance(3000)
+      expect(seen).toEqual([2, 4])
+      expect(player.chunk).toEqual({ start: 4, end: 6 })
+    })
+
+    it('snaps seeks to the start of the containing chunk', () => {
+      const player = new Player({ tokens: tokenize('a b c d e f'), wpm: 300, chunkSize: 3, clock })
+      player.seek(4)
+      expect(player.index).toBe(3)
+    })
+
+    it('starts from the chunk containing a saved position', () => {
+      const player = new Player({ tokens: tokenize('a b c d e f'), wpm: 300, chunkSize: 2, clock, position: 3 })
+      expect(player.index).toBe(2)
+    })
+
+    it('re-chunks around the current position when the size changes', () => {
+      const player = new Player({ tokens: tokenize('a b c d e f g'), wpm: 300, chunkSize: 1, clock, position: 5 })
+      player.setChunkSize(3)
+      expect(player.chunkSize).toBe(3)
+      expect(player.index).toBe(3)
+      expect(player.chunk).toEqual({ start: 3, end: 6 })
+    })
+
+    it('clamps the chunk size to 1–3', () => {
+      const player = new Player({ tokens: tokenize('a'), wpm: 300, clock })
+      player.setChunkSize(9)
+      expect(player.chunkSize).toBe(3)
+      player.setChunkSize(0)
+      expect(player.chunkSize).toBe(1)
+    })
+
+    it('reports being on the last chunk', () => {
+      const player = new Player({ tokens: tokenize('a b c d e'), wpm: 300, chunkSize: 2, clock, position: 4 })
+      expect(player.atLastChunk).toBe(true)
+      player.seek(1)
+      expect(player.atLastChunk).toBe(false)
+    })
+  })
 })
