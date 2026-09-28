@@ -75,7 +75,6 @@ describe('looksLikeMarkdown', () => {
 })
 
 describe('readableText', () => {
-  const words = (text: string) => tokenize(readableText(text)).map((t) => t.text)
 
   it('passes plain text through unchanged', () => {
     expect(readableText('Plain words.\n\nMore words.')).toBe('Plain words.\n\nMore words.')
@@ -89,18 +88,21 @@ describe('readableText', () => {
     expect(text).not.toMatch(/[#*`[\]]|https:/)
   })
 
-  it('reads a code block as a single placeholder', () => {
-    expect(words('Run it:\n\n```sh\nnpm run build\nnpm test\n```\n\nDone.')).toEqual([
-      'Run',
-      'it:',
-      '(code',
-      'block)',
-      'Done.',
-    ])
+  it('reads a code block as a single placeholder that keeps the code', () => {
+    const tokens = tokenize(readableText('Run it:\n\n```sh\nnpm run build\n\nnpm **test**\n```\n\nDone.'))
+    expect(tokens.map((t) => t.text)).toEqual(['Run', 'it:', '(code block)', 'Done.'])
+    expect(tokens[1].endsParagraph).toBe(true)
+    expect(tokens[2].code).toEqual({ language: 'sh', source: 'npm run build\n\nnpm **test**' })
   })
 
   it('treats an unclosed code block as running to the end', () => {
-    expect(words('Here:\n\n```\nconst a = 1')).toEqual(['Here:', '(code', 'block)'])
+    const tokens = tokenize(readableText('Here:\n\n```\nconst a = 1'))
+    expect(tokens.map((t) => t.text)).toEqual(['Here:', '(code block)'])
+    expect(tokens[1].code).toEqual({ language: '', source: 'const a = 1' })
+  })
+
+  it('titles a text that opens with code by its placeholder', () => {
+    expect(titleFromText(readableText('```js\nlet x\n```\n\nAfter.'))).toBe('(code block)')
   })
 
   it('gives a heading its own paragraph even without a blank line after it', () => {
