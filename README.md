@@ -1,6 +1,6 @@
 # Didread
 
-An installable, offline-capable RSVP speed reader. See [SPEC.md](SPEC.md) for the full v1 design.
+Too long? Did read. An installable, offline-capable RSVP speed reader. See [SPEC.md](SPEC.md) for the full v1 design.
 
 The repo, the web address and the on-device storage keys still say `speedreader`, so existing installs, saved libraries and links keep working under the new name.
 
