@@ -1,0 +1,14 @@
+{
+  "name": "speedreader",
+  "description": "Claude Code plugins for Speedreader, the RSVP speed reader.",
+  "owner": {
+    "name": "dj-abtion"
+  },
+  "plugins": [
+    {
+      "name": "speedread",
+      "source": "./plugins/speedread",
+      "description": "Turn Claude's previous reply into a one-tap Speedreader link."
+    }
+  ]
+}
