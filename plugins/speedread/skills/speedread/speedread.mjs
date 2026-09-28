@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Prints a Speedreader link that carries a Claude Code reply, so it can be read in one tap.
+// Prints a Didread link that carries a Claude Code reply, so it can be read in one tap.
 // With no input it reads the current session's transcript and picks the last finished reply.
 //
 //   node speedread.mjs            last reply before the current prompt

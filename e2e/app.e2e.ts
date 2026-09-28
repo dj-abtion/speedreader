@@ -39,7 +39,7 @@ test('loads offline after the first visit', async ({ page, context }) => {
 
   await context.setOffline(true)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Speedreader' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Didread' })).toBeVisible()
   await pasteAndRead(page, 'Reading works offline too.')
   await expect(page.locator('.frame')).toHaveText('Reading')
 })

@@ -1,6 +1,8 @@
-# Speedreader
+# Didread
 
 An installable, offline-capable RSVP speed reader. See [SPEC.md](SPEC.md) for the full v1 design.
+
+The repo, the web address and the on-device storage keys still say `speedreader`, so existing installs, saved libraries and links keep working under the new name.
 
 ## Development
 
@@ -26,7 +28,7 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 ## `/speedread` skill for Claude Code
 
-`plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Speedreader link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link.
+`plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Didread link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link.
 
 The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. Install it one of two ways:
 
