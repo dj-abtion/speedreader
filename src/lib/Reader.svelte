@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onDestroy, onMount, untrack } from 'svelte'
+  import { chunkText } from '../core/chunk'
   import { formatRemaining } from '../core/format'
   import { sentenceEnd, sentenceStart } from '../core/navigation'
-  import { MAX_WPM, MIN_WPM, Player } from '../core/player'
+  import { MAX_CHUNK_SIZE, MAX_WPM, MIN_WPM, Player } from '../core/player'
   import type { Token } from '../core/tokenize'
-  import { loadWpm, saveWpm } from './settings'
+  import { loadChunkSize, loadWpm, saveChunkSize, saveWpm } from './settings'
   import { createWakeLock } from './wakeLock'
   import WordDisplay from './WordDisplay.svelte'
 
@@ -28,6 +29,8 @@
   let finished = $state(false)
   const initialWpm = loadWpm()
   let wpm = $state(initialWpm)
+  const initialChunkSize = loadChunkSize()
+  let chunkSize = $state(initialChunkSize)
   let remaining = $state(0)
 
   let lastSavedAt = 0
@@ -40,8 +43,10 @@
   const player = new Player({
     ...initial,
     wpm: initialWpm,
+    chunkSize: initialChunkSize,
     onTick: (i) => {
       index = i
+      chunk = player.chunk
       remaining = player.remainingMs
       if (Date.now() - lastSavedAt >= SAVE_INTERVAL_MS) saveProgress()
     },
@@ -51,6 +56,8 @@
     },
   })
 
+  let chunk = $state(player.chunk)
+  let word = $derived(chunkText(tokens, chunk))
   let context = $derived(
     tokens.slice(sentenceStart(tokens, index), sentenceEnd(tokens, index) + 1),
   )
@@ -58,6 +65,8 @@
 
   function sync() {
     index = player.index
+    chunk = player.chunk
+    chunkSize = player.chunkSize
     playing = player.playing
     wpm = player.wpm
     remaining = player.remainingMs
@@ -69,9 +78,11 @@
     }
   }
 
+  // A finished text saves its last token so the library shows it as finished, whichever chunk
+  // size it was read at.
   function saveProgress() {
     lastSavedAt = Date.now()
-    onProgress(player.index)
+    onProgress(finished ? tokens.length - 1 : player.index)
   }
 
   function toggle() {
@@ -105,6 +116,16 @@
     sync()
   }
 
+  function setChunkSize(size: number) {
+    player.setChunkSize(size)
+    saveChunkSize(player.chunkSize)
+    sync()
+  }
+
+  function cycleChunkSize() {
+    setChunkSize((player.chunkSize % MAX_CHUNK_SIZE) + 1)
+  }
+
   function seek(event: Event) {
     player.seek(Number((event.currentTarget as HTMLInputElement).value))
     finished = false
@@ -124,6 +145,9 @@
       ArrowRight: forward,
       ArrowUp: () => changeWpm(WPM_STEP),
       ArrowDown: () => changeWpm(-WPM_STEP),
+      '1': () => setChunkSize(1),
+      '2': () => setChunkSize(2),
+      '3': () => setChunkSize(3),
       Escape: exit,
     }
     const action = actions[event.key]
@@ -137,7 +161,7 @@
   }
 
   onMount(() => {
-    finished = player.index > 0 && player.index === tokens.length - 1
+    finished = player.index > 0 && player.atLastChunk
     sync()
     document.addEventListener('visibilitychange', onVisibilityChange)
   })
@@ -154,12 +178,13 @@
 
 <div class="reader" class:playing>
   <button class="stage" onclick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
-    <WordDisplay word={tokens[index]?.text ?? ''} />
+    <WordDisplay {word} />
     <p class="context" aria-hidden={playing}>
       {#each context as token, i (contextOffset + i)}
+        {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
         <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
         <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
-        <span class:current={contextOffset + i === index}>{token.text}</span>{' '}
+        <span class:current>{token.text}</span>{' '}
       {/each}
     </p>
   </button>
@@ -187,6 +212,9 @@
         <span class="wpm">{wpm} wpm</span>
         <button onclick={() => changeWpm(WPM_STEP)} disabled={wpm >= MAX_WPM} aria-label="Faster">+</button>
       </div>
+      <button class="chunk-size" onclick={cycleChunkSize} aria-label="Words per flash">
+        {chunkSize} {chunkSize === 1 ? 'word' : 'words'}
+      </button>
     </div>
   </div>
 </div>
@@ -278,7 +306,8 @@
     text-align: center;
   }
 
-  .play {
+  .play,
+  .chunk-size {
     min-width: 5.5em;
   }
 </style>
