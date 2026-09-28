@@ -4,16 +4,30 @@
   import { decodeText, payloadFromHash } from './core/link'
   import { parseShare } from './core/share'
   import { tokenize, type Token } from './core/tokenize'
+  import { monthSummary } from './core/stats'
   import { applyAppearance, loadAppearance, saveAppearance, type Appearance } from './lib/appearance'
+  import Finish from './lib/Finish.svelte'
   import Home from './lib/Home.svelte'
-  import { openLibrary, type LibraryDocument } from './lib/library'
+  import { isFinished, openLibrary, type LibraryDocument } from './lib/library'
+  import { loadFinishes, recordFinish } from './lib/readingLog'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
 
   interface Reading {
     id: string | null
+    title: string
     tokens: Token[]
     position: number
+    // Reading time already spent on this read-through before the reader opened.
+    readingMs: number
+  }
+
+  interface Finished {
+    id: string | null
+    title: string
+    tokens: Token[]
+    readingMs: number
+    next: LibraryDocument | null
   }
 
   const library = openLibrary()
@@ -21,6 +35,9 @@
   let documents = $state<LibraryDocument[]>([])
   let storageAvailable = $state(true)
   let reading = $state<Reading | null>(null)
+  let finished = $state<Finished | null>(null)
+  let finishes = $state(loadFinishes())
+  let summary = $derived(monthSummary(finishes))
   let notice = $state('')
   let appearance = $state(loadAppearance())
 
@@ -40,13 +57,14 @@
 
   async function add(doc: NewDocument) {
     const newDoc = { ...doc, title: doc.title || titleFromText(doc.text) }
+    let id: string | null = null
     try {
-      const saved = await library.add(newDoc)
-      reading = { id: saved.id, tokens: tokenize(saved.text), position: 0 }
+      id = (await library.add(newDoc)).id
     } catch {
       storageAvailable = false
-      reading = { id: null, tokens: tokenize(newDoc.text), position: 0 }
     }
+    finished = null
+    reading = { id, title: newDoc.title, tokens: tokenize(newDoc.text), position: 0, readingMs: 0 }
   }
 
   // Tapping the same link again, as happens with a link that stays in a chat, resumes the text
@@ -64,8 +82,17 @@
     else await add({ title: '', text })
   }
 
+  // A finished text opens at the start for another read-through.
   function open(doc: LibraryDocument) {
-    reading = { id: doc.id, tokens: tokenize(doc.text), position: doc.position }
+    const again = isFinished(doc)
+    finished = null
+    reading = {
+      id: doc.id,
+      title: doc.title,
+      tokens: tokenize(doc.text),
+      position: again ? 0 : doc.position,
+      readingMs: again ? 0 : (doc.readingMs ?? 0),
+    }
     library.markOpened(doc.id).catch(() => {})
   }
 
@@ -74,8 +101,36 @@
     await refresh()
   }
 
-  function saveProgress(index: number) {
-    if (reading?.id) library.savePosition(reading.id, index).catch(() => {})
+  function saveProgress(index: number, readingMs: number) {
+    if (reading?.id) library.saveProgress(reading.id, index, reading.readingMs + readingMs).catch(() => {})
+  }
+
+  async function finish(readingMs: number) {
+    if (!reading) return
+    const { id, title, tokens } = reading
+    const total = reading.readingMs + readingMs
+    recordFinish({ at: Date.now(), words: tokens.length, readingMs: total })
+    finishes = loadFinishes()
+    navigator.vibrate?.(40)
+    reading = null
+    finished = { id, title, tokens, readingMs: total, next: null }
+    if (id) await library.markFinished(id, total).catch(() => {})
+    await refresh()
+    if (finished?.id === id) {
+      finished.next = documents.find((doc) => doc.id !== id && !isFinished(doc)) ?? null
+    }
+  }
+
+  function readAgain() {
+    if (!finished) return
+    const { id, title, tokens } = finished
+    finished = null
+    reading = { id, title, tokens, position: 0, readingMs: 0 }
+  }
+
+  async function backToLibrary() {
+    finished = null
+    await refresh()
   }
 
   async function exit() {
@@ -119,13 +174,25 @@
         {appearance}
         onAppearanceChange={changeAppearance}
         onProgress={saveProgress}
+        onFinish={finish}
         onExit={exit}
       />
     {/key}
+  {:else if finished}
+    <Finish
+      title={finished.title}
+      words={finished.tokens.length}
+      readingMs={finished.readingMs}
+      next={finished.next}
+      onReadNext={open}
+      onReadAgain={readAgain}
+      onLibrary={backToLibrary}
+    />
   {:else}
     <Home
       {documents}
       {storageAvailable}
+      {summary}
       {notice}
       {appearance}
       onAppearanceChange={changeAppearance}

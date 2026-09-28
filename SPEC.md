@@ -9,7 +9,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 
 ## Input
 
-- Paste text into a textarea.
+- Paste text into a textarea, opened with "Paste text" (shown straight away where the clipboard can't be read).
 - "Read clipboard" button (shown where `navigator.clipboard.readText` exists): one tap reads the copied text, which is the quickest route on iOS, where share targets aren't available.
 - Reader links: `…/speedreader/#t=<payload>`, where the payload is the text compressed with `deflate-raw` and base64url-encoded. The fragment never reaches the server; the app clears it with `history.replaceState` as soon as it has read it. Opening a link whose text is already in the library resumes that copy. Decompressed text is capped at 5 MB. A reader link pasted or read from the clipboard opens the same way.
 - Open a `.txt` or `.md` file.
@@ -23,8 +23,16 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 
 ## Persistence
 
-- **Library** stored on-device in IndexedDB. Each document: `id`, `title` (first line or filename), `text`, `position` (word index), `lastOpenedAt`.
+- **Library** stored on-device in IndexedDB. Each document: `id`, `title` (first line or filename), `text`, `position` (word index), `lastOpenedAt`, `readingMs` (time spent playing in the current read-through) and `finishedAt`.
 - **Settings** in `localStorage`: WPM, theme, font family, font size.
+- **Finishes** in `localStorage`: date, word count and reading time of each finished text, kept apart from the library so time saved survives deleting a text.
+
+## Home and finishing
+
+- "Read clipboard" is the main action; "Paste text" and "Open file" sit below it.
+- Library cards show the title (two lines), a progress bar, the word count and "N% · M min left", or "Not started". A finished text shows a **Did read** stamp with its word count and reading time; opening it starts a new read-through from the beginning.
+- Finishing a text opens a finish screen: the check draws itself in, with the word count, reading time and time saved, and the next unfinished text in the library. Android phones give a short vibration.
+- Time saved is the time an average adult would take at 238 wpm (Brysbaert, 2019) minus the reading time, never below zero. The home screen shows this month's total once it reaches a minute.
 - No sync between devices.
 
 ## Tokenizer
@@ -53,10 +61,11 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 
 - ORP pivot index by word length: 1 → 0, 2–5 → 1, 6–9 → 2, 10–13 → 3, 14+ → 4.
 - Three-span layout (before | pivot | after) around a fixed column slightly left of centre; pivot in an accent colour with thin guide ticks above and below. Works with proportional fonts.
-- System UI font by default; optional serif for the reading text.
+- System UI font by default for the reading text, with an optional serif. The rest of the app uses Figtree, with Bricolage Grotesque for the name and large numbers; both are bundled so they work offline.
+- Neutrals are tinted warm towards the orange accent.
 - Font size S / M / L / XL, scaling the responsive `clamp()` size (M is the default).
 - Theme follows the system, with a light / dark / system toggle.
-- Theme, font and size are set under "Display" on the home screen or the reader's "Aa" button, remembered in `localStorage`, and applied before the first render so a chosen theme never flashes.
+- Theme, font and size are set with the "Aa" button on the home screen or in the reader, remembered in `localStorage`, and applied before the first render so a chosen theme never flashes.
 - No token ever overflows the frame: chunking guarantees this at the default size; at XL a token that would overflow is scaled down.
 
 ## Controls

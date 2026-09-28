@@ -1,14 +1,19 @@
 :root {
   color-scheme: light;
-  font-family: system-ui, sans-serif;
+  font-family: var(--ui-font);
+  --ui-font: 'Figtree Variable', system-ui, sans-serif;
+  --display-font: 'Bricolage Grotesque Variable', var(--ui-font);
   --serif-font: ui-serif, Georgia, 'Times New Roman', serif;
-  --reading-font: inherit;
-  --text: #1a1a1a;
-  --muted: #6b6b6b;
+  --reading-font: system-ui, sans-serif;
+  /* Neutrals lean warm, towards the orange accent. */
+  --text: #1c1a17;
+  --muted: #6b655c;
   --surface: #ffffff;
-  --background: #f7f7f5;
-  --accent: #d9480f;
-  --guide: #c8c8c8;
+  --background: #f6f3ee;
+  --accent: #c2410c;
+  --on-accent: #ffffff;
+  --guide: #d9d2c7;
+  --track: #ece6dc;
   --text-scale: 1;
   --word-size: calc(clamp(2.25rem, 9vw, 4.5rem) * var(--text-scale));
   --phrase-size: calc(clamp(1.5rem, 6vw, 3.5rem) * var(--text-scale));
@@ -18,23 +23,27 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --text: #ececec;
-    --muted: #9a9a9a;
-    --surface: #1e1e1e;
-    --background: #121212;
+    --text: #efece6;
+    --muted: #a39d93;
+    --surface: #1e1c19;
+    --background: #141311;
     --accent: #ff8a4c;
-    --guide: #444444;
+    --on-accent: #1a1208;
+    --guide: #3d3934;
+    --track: #2e2b27;
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --text: #ececec;
-  --muted: #9a9a9a;
-  --surface: #1e1e1e;
-  --background: #121212;
+  --text: #efece6;
+  --muted: #a39d93;
+  --surface: #1e1c19;
+  --background: #141311;
   --accent: #ff8a4c;
-  --guide: #444444;
+  --on-accent: #1a1208;
+  --guide: #3d3934;
+  --track: #2e2b27;
 }
 
 :root[data-font='serif'] {
