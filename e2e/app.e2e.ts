@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { encodeText } from '../src/core/link'
 
 const story = [
   'A Long Story',
@@ -136,4 +137,53 @@ test('remembers the chosen theme, font and size', async ({ page }) => {
   await expect(frame).toHaveCSS('font-family', /serif/)
   const largeSize = await frame.evaluate((el) => getComputedStyle(el).fontSize)
   expect(parseFloat(largeSize)).toBeGreaterThan(parseFloat(defaultSize))
+})
+
+test('opens a reader link and keeps its text out of the URL', async ({ page }) => {
+  const reply = '## Short answer\n\nThe text travels **inside** the link. Nothing reaches a server.'
+  const link = `./#t=${await encodeText(reply)}`
+  await page.goto(link)
+  await expect(page.locator('.frame')).toHaveText('Short')
+  await expect(page).toHaveURL(/\/speedreader\/$/)
+
+  await page.keyboard.press('Space')
+  await page.waitForTimeout(2500)
+  await page.keyboard.press('Space')
+  await page.keyboard.press('Escape')
+  const saved = page.getByRole('button', { name: /^Short answer/ })
+  await expect(saved).not.toContainText('0%')
+
+  // Opening the same link again resumes the saved copy instead of adding another.
+  await page.goto(link)
+  await expect(page.locator('.frame')).not.toHaveText('Short')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: /^Short answer/ })).toHaveCount(1)
+})
+
+test('explains when a reader link is damaged', async ({ page }) => {
+  await page.goto('./#t=notavalidpayload')
+  await expect(page.getByRole('status')).toHaveText(/couldn't be opened/)
+  await expect(page).toHaveURL(/\/speedreader\/$/)
+})
+
+test('reads Markdown from the clipboard as plain text', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('./')
+  await page.evaluate(() =>
+    navigator.clipboard.writeText('# Copied reply\n\n```js\nconsole.log(1)\n```\n\nSome **bold** words.'),
+  )
+  await page.getByRole('button', { name: 'Read clipboard' }).click()
+  await expect(page.locator('.frame')).toHaveText('Copied')
+
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: /^Copied reply/ })).toBeVisible()
+})
+
+test('opens a reader link copied to the clipboard', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('./')
+  const link = `${new URL(page.url()).origin}/speedreader/#t=${await encodeText('Linked words arrive.')}`
+  await page.evaluate((text) => navigator.clipboard.writeText(text), link)
+  await page.getByRole('button', { name: 'Read clipboard' }).click()
+  await expect(page.locator('.frame')).toHaveText('Linked')
 })

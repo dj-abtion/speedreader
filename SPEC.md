@@ -10,10 +10,15 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 ## Input
 
 - Paste text into a textarea.
+- "Read clipboard" button (shown where `navigator.clipboard.readText` exists): one tap reads the copied text, which is the quickest route on iOS, where share targets aren't available.
+- Reader links: `…/speedreader/#t=<payload>`, where the payload is the text compressed with `deflate-raw` and base64url-encoded. The fragment never reaches the server; the app clears it with `history.replaceState` as soon as it has read it. Opening a link whose text is already in the library resumes that copy. Decompressed text is capped at 5 MB. A reader link pasted or read from the clipboard opens the same way.
 - Open a `.txt` or `.md` file.
 - Web Share Target: share text to the installed app (Android; iOS Safari does not support share targets). Shares use POST and are answered by the service worker on the device, which parks the text in Cache Storage and opens the app with only a `?shared` flag, so shared text never appears in a URL, browser history or server logs.
 - **Not in v1:** URL / article fetching. Browsers cannot fetch arbitrary pages (CORS) without a proxy, which would break "no backend". A shared bare URL shows a friendly "not supported" message.
-- Markdown is stripped to plain text before tokenizing.
+- Markdown is stripped to plain text before tokenizing: always for `.md` files, and for pasted, shared, clipboard and linked text when it clearly looks like Markdown (headings, fences, bold, links, inline code, tables or a list), so plain prose is left alone.
+  - A fenced code block reads as a single "(code block)" placeholder.
+  - A heading becomes its own paragraph.
+  - List items and table rows (cells joined by dashes) that don't end in punctuation get a clause pause.
 
 ## Persistence
 

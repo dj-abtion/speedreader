@@ -40,4 +40,11 @@ describe('parseShare', () => {
       document: { title: '', text: 'Read this later https://example.com' },
     })
   })
+
+  it('strips Markdown from shared text', () => {
+    expect(parseShare(params('?text=' + encodeURIComponent('## Reply\n\nSome **bold** words.')))).toEqual({
+      kind: 'document',
+      document: { title: '', text: 'Reply\n\nSome bold words.' },
+    })
+  })
 })

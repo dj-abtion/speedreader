@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { titleFromText, type NewDocument } from './core/document'
+  import { readableText, titleFromText, type NewDocument } from './core/document'
+  import { decodeText, payloadFromHash } from './core/link'
   import { parseShare } from './core/share'
   import { tokenize, type Token } from './core/tokenize'
   import { applyAppearance, loadAppearance, saveAppearance, type Appearance } from './lib/appearance'
@@ -48,6 +49,21 @@
     }
   }
 
+  // Tapping the same link again, as happens with a link that stays in a chat, resumes the text
+  // saved the first time rather than adding a copy.
+  async function openLink(payload: string) {
+    let text: string
+    try {
+      text = readableText(await decodeText(payload))
+    } catch {
+      notice = "This link couldn't be opened. It may have been cut off when it was copied."
+      return
+    }
+    const saved = (await library.list().catch(() => [])).find((doc) => doc.text === text)
+    if (saved) open(saved)
+    else await add({ title: '', text })
+  }
+
   function open(doc: LibraryDocument) {
     reading = { id: doc.id, tokens: tokenize(doc.text), position: doc.position }
     library.markOpened(doc.id).catch(() => {})
@@ -78,9 +94,19 @@
     if (share.kind === 'link') notice = "Links can't be opened yet. Share the text itself instead."
   }
 
-  onMount(async () => {
-    await receiveShare()
-    await refresh()
+  // The fragment is cleared straight away so the text doesn't linger in the address bar or in
+  // the history entry.
+  async function receiveLink() {
+    const payload = payloadFromHash(location.hash)
+    if (payload === null) return
+    history.replaceState(null, '', location.pathname + location.search)
+    await openLink(payload)
+  }
+
+  onMount(() => {
+    window.addEventListener('hashchange', receiveLink)
+    receiveLink().then(receiveShare).then(refresh)
+    return () => window.removeEventListener('hashchange', receiveLink)
   })
 </script>
 
@@ -104,6 +130,7 @@
       {appearance}
       onAppearanceChange={changeAppearance}
       onAdd={add}
+      onOpenLink={openLink}
       onOpen={open}
       onRemove={remove}
     />
