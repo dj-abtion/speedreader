@@ -12,6 +12,8 @@
   import { loadFinishes, recordFinish } from './lib/readingLog'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
+  import { GUIDE_HASH } from './lib/skill'
+  import SkillGuide from './lib/SkillGuide.svelte'
 
   interface Reading {
     id: string | null
@@ -40,6 +42,7 @@
   let summary = $derived(monthSummary(finishes))
   let notice = $state('')
   let appearance = $state(loadAppearance())
+  let showGuide = $state(location.hash === GUIDE_HASH)
 
   function changeAppearance(next: Appearance) {
     appearance = next
@@ -158,10 +161,28 @@
     await openLink(payload)
   }
 
+  function onHashChange() {
+    showGuide = location.hash === GUIDE_HASH
+    receiveLink()
+  }
+
+  function openGuide() {
+    history.pushState({ guide: true }, '', GUIDE_HASH)
+    showGuide = true
+  }
+
+  // Going back undoes the entry openGuide pushed, so the browser's own back button agrees. A
+  // guide opened straight from a shared link has no entry of ours to go back to.
+  function closeGuide() {
+    if (history.state?.guide) return history.back()
+    history.replaceState(null, '', location.pathname + location.search)
+    showGuide = false
+  }
+
   onMount(() => {
-    window.addEventListener('hashchange', receiveLink)
+    window.addEventListener('hashchange', onHashChange)
     receiveLink().then(receiveShare).then(refresh)
-    return () => window.removeEventListener('hashchange', receiveLink)
+    return () => window.removeEventListener('hashchange', onHashChange)
   })
 </script>
 
@@ -188,6 +209,8 @@
       onReadAgain={readAgain}
       onLibrary={backToLibrary}
     />
+  {:else if showGuide}
+    <SkillGuide onBack={closeGuide} />
   {:else}
     <Home
       {documents}
@@ -200,6 +223,7 @@
       onOpenLink={openLink}
       onOpen={open}
       onRemove={remove}
+      onShowGuide={openGuide}
     />
   {/if}
 </main>

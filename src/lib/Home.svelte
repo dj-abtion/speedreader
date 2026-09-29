@@ -7,6 +7,7 @@
   import AppearanceSettings from './AppearanceSettings.svelte'
   import { isFinished, type LibraryDocument } from './library'
   import { loadWpm } from './settings'
+  import { GUIDE_HASH } from './skill'
   import { buildInfo, formatVersion, REPOSITORY_URL } from './version'
 
   let {
@@ -20,6 +21,7 @@
     onOpenLink,
     onOpen,
     onRemove,
+    onShowGuide,
   }: {
     documents: LibraryDocument[]
     storageAvailable: boolean
@@ -31,6 +33,7 @@
     onOpenLink: (payload: string) => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
+    onShowGuide: () => void
   } = $props()
 
   const appUrl = `${location.origin}${import.meta.env.BASE_URL}`
@@ -217,14 +220,23 @@
     </section>
   {/if}
 
-  <footer class="version">
-    {#if buildInfo.commit}
-      <a href={`${REPOSITORY_URL}/commit/${buildInfo.commit}`} target="_blank" rel="noreferrer"
-        >{formatVersion(buildInfo)}</a
-      >
-    {:else}
-      {formatVersion(buildInfo)}
-    {/if}
+  <footer>
+    <a
+      class="claude"
+      href={GUIDE_HASH}
+      onclick={(event) => {
+        event.preventDefault()
+        onShowGuide()
+      }}>Use with Claude →</a>
+    <span class="version">
+      {#if buildInfo.commit}
+        <a href={`${REPOSITORY_URL}/commit/${buildInfo.commit}`} target="_blank" rel="noreferrer"
+          >{formatVersion(buildInfo)}</a
+        >
+      {:else}
+        {formatVersion(buildInfo)}
+      {/if}
+    </span>
   </footer>
 </div>
 
@@ -552,10 +564,24 @@
     stroke-width: 2.2;
   }
 
-  .version {
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
     margin-top: auto;
     font-size: 0.8rem;
     color: var(--muted);
+  }
+
+  .claude {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .version {
     font-variant-numeric: tabular-nums;
   }
 

@@ -112,8 +112,8 @@ test('shows several words per flash and remembers the setting', async ({ page })
 
 test('shows the build version on the home screen', async ({ page }) => {
   await page.goto('./')
-  await expect(page.locator('footer.version')).toHaveText(/^Version [0-9a-f]{7} · \d{1,2} [A-Z][a-z]{2} \d{4}$/)
-  await expect(page.locator('footer.version a')).toHaveAttribute(
+  await expect(page.locator('.version')).toHaveText(/^Version [0-9a-f]{7} · \d{1,2} [A-Z][a-z]{2} \d{4}$/)
+  await expect(page.locator('.version a')).toHaveAttribute(
     'href',
     /^https:\/\/github\.com\/dj-abtion\/speedreader\/commit\/[0-9a-f]{40}$/,
   )
@@ -227,4 +227,31 @@ test('stops on a code block and shows the code until reading continues', async (
 
   await page.getByRole('button', { name: 'Continue reading' }).click()
   await expect(page.locator('.frame')).toHaveText(/After|the|code\./)
+})
+
+test('opens the Claude guide from the footer and goes back', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('link', { name: 'Use with Claude' }).click()
+  await expect(page.getByRole('heading', { name: 'Use with Claude' })).toBeVisible()
+  await expect(page).toHaveURL(/#claude$/)
+  await expect(page.getByRole('link', { name: 'Download skill' })).toHaveAttribute(
+    'href',
+    'https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip',
+  )
+
+  await page.getByRole('button', { name: 'Back to library' }).click()
+  await expect(page.getByText('Too long? Did read.')).toBeVisible()
+  await expect(page).not.toHaveURL(/#/)
+
+  await page.getByRole('link', { name: 'Use with Claude' }).click()
+  await page.goBack()
+  await expect(page.getByText('Too long? Did read.')).toBeVisible()
+})
+
+test('opens the Claude guide from a shared link', async ({ page }) => {
+  await page.goto('./#claude')
+  await expect(page.getByRole('heading', { name: 'Use with Claude' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByText('Too long? Did read.')).toBeVisible()
+  await expect(page).not.toHaveURL(/#/)
 })
