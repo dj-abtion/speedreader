@@ -44,4 +44,5 @@ Use `--stdin` the same way when the user wants something other than a whole repl
 
 - If Node isn't available, or code execution is off, say so in one line. Don't try to build the link by hand.
 - Don't edit the script's content when saving it; the compression format must stay byte-compatible with the reader.
+- If an Abtion colleague asks how to install it: they don't need to. Brewale already gives them this skill, and adding the copy from the organization's skill library in Claude or uploading the zip only leaves them with two `speedread` skills. In Claude Code, the Brewale entry in the `/` menu (`/claude.ai brewale-abtion-mcp:speedread`) fails with "Unknown command" because Claude Code cuts the name at the space; tell them to ask in words ("speedread that") or install the `didread` plugin for a working `/didread:speedread`.
 - Source, installation guide and the Claude Code plugin: https://dj-abtion.github.io/speedreader/#claude and https://github.com/dj-abtion/speedreader.
