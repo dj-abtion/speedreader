@@ -34,12 +34,14 @@ The skill folder is self-contained: `SKILL.md` plus a dependency-free Node scrip
 
 - **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change.
 
-- **Claude Code CLI on your own machine:** this repo is also a plugin marketplace.
+- **Claude Code CLI on your own machine:** this repo is also a plugin marketplace. Run the two commands one at a time; the skill then shows as `didread:speedread` in the `/` menu and updates itself.
 
   ```sh
   claude plugin marketplace add dj-abtion/speedreader
-  claude plugin install speedread@speedreader
+  claude plugin install didread@speedreader
   ```
+
+The plugin was called `speedread` before; if you installed it under that name, run `claude plugin uninstall speedread@speedreader` first.
 
 The script can also be run directly: `node plugins/speedread/skills/speedread/speedread.mjs --stdin < reply.md`.
 

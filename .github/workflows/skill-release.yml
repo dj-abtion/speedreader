@@ -27,6 +27,23 @@ jobs:
       - uses: actions/checkout@v7
       - name: Zip the skill folder
         run: cd plugins/speedread/skills && zip -X -r "$RUNNER_TEMP/speedread.zip" speedread
+      - name: Write the release notes
+        run: |
+          cat > "$RUNNER_TEMP/notes.md" <<NOTES
+          The \`/speedread\` skill for Claude, built from ${GITHUB_SHA::7}.
+
+          **Claude app, web or cloud sessions:** download \`speedread.zip\`, then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on.
+
+          **Claude Code in a terminal:** skip the zip. Run these one at a time, each as its own message:
+
+          \`\`\`
+          /plugin marketplace add dj-abtion/speedreader
+          \`\`\`
+
+          \`\`\`
+          /plugin install didread@speedreader
+          \`\`\`
+          NOTES
       - name: Replace the release
         run: |
           gh release delete "$TAG" --cleanup-tag --yes || true
@@ -34,9 +51,4 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "/speedread skill" \
             --latest \
-            --notes "The \`/speedread\` skill for Claude, built from ${GITHUB_SHA::7}.
-
-          **Claude app, web or cloud sessions:** download \`speedread.zip\`, then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on.
-
-          **Claude Code in a terminal:** skip the zip and run
-          \`/plugin marketplace add dj-abtion/speedreader\`, then \`/plugin install speedread@speedreader\`."
+            --notes-file "$RUNNER_TEMP/notes.md"

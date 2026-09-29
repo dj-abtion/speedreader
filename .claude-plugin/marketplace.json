@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "speedread",
+      "name": "didread",
       "source": "./plugins/speedread",
       "description": "Turn Claude's previous reply into a one-tap Didread link."
     }
