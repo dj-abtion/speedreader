@@ -43,6 +43,12 @@ The skill folder is self-contained: `SKILL.md` plus a dependency-free Node scrip
 
 The plugin was called `speedread` before; if you installed it under that name, run `claude plugin uninstall speedread@speedreader` first.
 
+### Brewale (Abtion colleagues)
+
+The skill is also published to Abtion's Brewale as `speedread`, so colleagues' agents pick it up with nothing to install. Brewale serves the instructions, and the agent downloads the script from `https://dj-abtion.github.io/speedreader/speedread.mjs`, which every deploy publishes from `plugins/speedread/skills/speedread/speedread.mjs`. Script changes therefore reach colleagues once they're merged and deployed, with no Brewale update. The Brewale skill also bundles a copy of the script as a fallback for sessions that can't reach the site.
+
+The Brewale instructions live in [`brewale/speedread.md`](brewale/speedread.md). When you change them, publish a new version of the `speedread` skill in Brewale with that file as the body. Refreshing the bundled fallback copy at the same time is good practice.
+
 The script can also be run directly: `node plugins/speedread/skills/speedread/speedread.mjs --stdin < reply.md`.
 
 ## Layout
