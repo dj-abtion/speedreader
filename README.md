@@ -32,11 +32,7 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. Install it one of two ways:
 
-- **Every session, including the Claude app and cloud sessions:** zip the folder and upload it in the Skills section of your claude.ai settings. Skills on your account are synced into every Claude Code cloud session.
-
-  ```sh
-  cd plugins/speedread/skills && zip -r speedread.zip speedread
-  ```
+- **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change.
 
 - **Claude Code CLI on your own machine:** this repo is also a plugin marketplace.
 
