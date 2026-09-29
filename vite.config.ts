@@ -1,6 +1,7 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { execSync } from 'node:child_process'
-import { defineConfig } from 'vite'
+import { readFileSync } from 'node:fs'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // GitHub Pages serves the site from /speedreader/; the manifest scope and start_url must match
@@ -16,6 +17,20 @@ function git(args: string): string {
   }
 }
 
+// The /speedread skill as served from Brewale downloads its script from here, so colleagues get
+// each change with the next deploy instead of whenever someone republishes the skill.
+const SKILL_SCRIPT = 'plugins/speedread/skills/speedread/speedread.mjs'
+
+function publishSkillScript(): Plugin {
+  return {
+    name: 'publish-skill-script',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'speedread.mjs', source: readFileSync(SKILL_SCRIPT) })
+    },
+  }
+}
+
 export default defineConfig({
   base,
   define: {
@@ -24,6 +39,7 @@ export default defineConfig({
   },
   plugins: [
     svelte(),
+    publishSkillScript(),
     VitePWA({
       registerType: 'autoUpdate',
       strategies: 'injectManifest',

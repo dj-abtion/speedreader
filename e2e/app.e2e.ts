@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { readFileSync } from 'node:fs'
 import { encodeText } from '../src/core/link.ts'
 
 const story = [
@@ -254,4 +255,11 @@ test('opens the Claude guide from a shared link', async ({ page }) => {
   await page.keyboard.press('Escape')
   await expect(page.getByText('Too long? Did read.')).toBeVisible()
   await expect(page).not.toHaveURL(/#/)
+})
+
+// The Brewale copy of the /speedread skill downloads this file, so it must match the plugin's.
+test('serves the /speedread script next to the app', async ({ request }) => {
+  const response = await request.get('./speedread.mjs')
+  expect(response.ok()).toBe(true)
+  expect(await response.text()).toBe(readFileSync('plugins/speedread/skills/speedread/speedread.mjs', 'utf8'))
 })
