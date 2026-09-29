@@ -30,7 +30,7 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 `plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Didread link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link, and on your own computer the script also opens it in your browser.
 
-The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. Install it one of two ways:
+The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. To share it, send people [the in-app guide](https://dj-abtion.github.io/speedreader/#claude), which is also linked from the home screen's footer as "Use with Claude". Install it one of two ways:
 
 - **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change.
 
