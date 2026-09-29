@@ -28,7 +28,7 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 ## `/speedread` skill for Claude Code
 
-`plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Didread link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link.
+`plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Didread link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link, and on your own computer the script also opens it in your browser.
 
 The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. Install it one of two ways:
 

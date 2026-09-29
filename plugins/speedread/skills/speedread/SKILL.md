@@ -19,6 +19,8 @@ Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/
 
    Pass `--back N` to go N replies back. Use the number the user gave, e.g. `/speedread 2`, or 1 when they gave none. The script reads this session's transcript and takes the final text of that reply, leaving out narration between tool calls. Earlier link requests and their link replies don't count, so `/speedread 2` straight after `/speedread` means the reply before the first link.
 
+   On the user's own computer the script also opens the link in their browser and says so at the end of its line. It skips that in cloud sessions and over SSH. Pass `--no-open` if the user asks for just the link.
+
 2. Reply with **exactly the one line the script prints** (a Markdown link, then the word count and reading time). Don't add anything before or after it, repeat the reply, or summarise it. The user wants to save reading time.
 
 ## When the script can't read the transcript

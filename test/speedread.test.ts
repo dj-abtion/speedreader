@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { decodeText, payloadFromLink } from '../src/core/link.ts'
 import {
+  browserCommand,
   DEFAULT_APP_URL,
   encodeText,
   lastReply,
@@ -118,5 +119,23 @@ describe('speedread link script', () => {
     expect(summary(text, 'LINK')).toBe(
       '[⚡ Speed-read this reply](LINK) · 900 words, about 3 min at 300 wpm',
     )
+  })
+
+  it("opens the link with the platform browser on the user's own computer", () => {
+    expect(browserCommand('https://x/#t=a', 'darwin', {})).toEqual(['open', ['https://x/#t=a']])
+    expect(browserCommand('https://x/', 'win32', {})).toEqual(['rundll32', ['url.dll,FileProtocolHandler', 'https://x/']])
+    expect(browserCommand('https://x/', 'linux', { DISPLAY: ':0' })).toEqual(['xdg-open', ['https://x/']])
+  })
+
+  it("opens nothing where the browser is not the user's", () => {
+    expect(browserCommand('https://x/', 'linux', { CLAUDE_CODE_REMOTE: 'true', DISPLAY: ':0' })).toBeNull()
+    expect(browserCommand('https://x/', 'darwin', { SSH_CONNECTION: '1.2.3.4 22 5.6.7.8 22' })).toBeNull()
+    expect(browserCommand('https://x/', 'linux', {})).toBeNull()
+  })
+
+  it('says when the link was opened', () => {
+    expect(summary('two words', 'https://x/', true)).toMatch(/ · opened in your browser$/)
+    expect(summary('two words', 'https://x/')).not.toMatch(/opened/)
+    expect(summary('one', 'https://x/')).toMatch(/ · 1 word, /)
   })
 })
