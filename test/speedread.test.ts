@@ -78,6 +78,20 @@ describe('speedread link script', () => {
     expect(lastReply(entries, 2)).toBe('Reply one.')
   })
 
+  it('skips link requests made under a plugin or account prefix', () => {
+    const linkReply = '[⚡ Speed-read this reply](https://example.com/#t=abc) · 3 words'
+    const entries = [
+      prompt('question'),
+      say('The answer.'),
+      prompt('/didread:speedread'),
+      say(linkReply),
+      prompt('<command-name>/anthropic-skills:speedread</command-name>'),
+      say(linkReply),
+      prompt('/speedread:speedread'),
+    ]
+    expect(lastReply(entries)).toBe('The answer.')
+  })
+
   it('still counts replies to prompts that only mention the skill', () => {
     const entries = [prompt('now do the /speedread skill'), say('Done, the skill is built.'), prompt('/speedread')]
     expect(lastReply(entries)).toBe('Done, the skill is built.')

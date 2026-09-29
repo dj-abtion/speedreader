@@ -65,7 +65,9 @@ export function lastReply(entries, back = 1) {
 
 // Typed as "/speedread 2", or expanded as <command-name>/speedread</command-name> once the
 // skill is installed, optionally namespaced by its plugin.
-const SPEEDREAD_PROMPT = /^\s*\/(speedread:)?speedread\b|<command-name>\/?(speedread:)?speedread<\/command-name>/
+// Installed skills can carry a prefix: the plugin's name (didread:, speedread: before the rename)
+// or anthropic-skills: for a skill uploaded to a claude.ai account.
+const SPEEDREAD_PROMPT = /^\s*\/([\w-]+:)?speedread\b|<command-name>\/?([\w-]+:)?speedread<\/command-name>/
 const LINK_REPLY = /\[⚡ Speed-read this reply\]\(/
 
 /** @param {Entry} entry */

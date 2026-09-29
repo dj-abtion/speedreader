@@ -1,7 +1,7 @@
 {
-  "name": "speedread",
+  "name": "didread",
   "description": "Turn Claude's previous reply into a one-tap Didread link.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": { "name": "dj-abtion" },
   "homepage": "https://dj-abtion.github.io/speedreader/"
 }
