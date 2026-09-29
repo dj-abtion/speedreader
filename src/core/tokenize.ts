@@ -1,4 +1,6 @@
+import { MAX_CHUNK_LENGTH } from './chunk'
 import { CODE_BLOCK, CODE_BLOCK_LABEL, type CodeBlock } from './code'
+import { isNumber } from './number'
 
 export interface Token {
   text: string
@@ -86,8 +88,10 @@ function endsSentence(word: string): boolean {
   return !ABBREVIATIONS.has(bare)
 }
 
+// Half a number is unreadable, so numbers stay whole as long as they still fit on screen.
 function splitLong(word: string): string[] {
   if (word.length <= MAX_TOKEN_LENGTH) return [word]
+  if (isNumber(word) && word.length <= MAX_CHUNK_LENGTH) return [word]
   return groupHyphenParts(word).flatMap((part) =>
     part.length <= MAX_TOKEN_LENGTH ? [part] : chunk(part),
   )

@@ -76,7 +76,12 @@ describe('tokenize', () => {
     expect(tokens.map((t) => t.endsSentence)).toEqual([false, false, true])
   })
 
-  it('never produces a token longer than 13 characters', () => {
+  it('keeps long numbers whole', () => {
+    expect(texts('call +45-1234-567890 now')).toEqual(['call', '+45-1234-567890', 'now'])
+    expect(texts('it cost $1,234,567.89 total')).toEqual(['it', 'cost', '$1,234,567.89', 'total'])
+  })
+
+  it('never produces a word token longer than 13 characters', () => {
     const tokens = tokenize('https://example.com/a/very/long/path?query=1 supercalifragilisticexpialidocious')
     for (const token of tokens) expect(token.text.length).toBeLessThanOrEqual(13)
   })

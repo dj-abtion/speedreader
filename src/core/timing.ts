@@ -1,3 +1,4 @@
+import { digitCount, isNumber } from './number'
 import type { Token } from './tokenize'
 
 const PARAGRAPH_PAUSE = 2.5
@@ -5,16 +6,21 @@ const SENTENCE_PAUSE = 2
 const CLAUSE_PAUSE = 1.5
 const LONG_WORD_LENGTH = 8
 const LONG_WORD_PAUSE = 1.3
+// Numbers can't be recognised by their shape the way words can, so each digit needs reading.
+const NUMBER_PAUSE_PER_DIGIT = 0.15
+const MAX_NUMBER_PAUSE = 2
 
 export const RAMP_MS = 2000
 const RAMP_START = 1.6
 
 // Normalised so the mean weight is 1: pauses redistribute time rather than
 // add it, which keeps the chosen WPM equal to the real average reading rate.
+// Number pauses are applied after normalising, so they add time instead: otherwise a
+// number-heavy text would rush the words between its numbers.
 export function weights(tokens: Token[]): number[] {
   const raw = tokens.map(rawWeight)
   const mean = raw.reduce((sum, w) => sum + w, 0) / raw.length
-  return raw.map((w) => w / mean)
+  return raw.map((w, i) => (w / mean) * numberPause(tokens[i]))
 }
 
 export function durations(tokenWeights: number[], wpm: number): number[] {
@@ -39,5 +45,11 @@ function rawWeight(token: Token): number {
       : token.endsClause
         ? CLAUSE_PAUSE
         : 1
-  return token.text.length > LONG_WORD_LENGTH ? pause * LONG_WORD_PAUSE : pause
+  const isLongWord = token.text.length > LONG_WORD_LENGTH && !isNumber(token.text)
+  return isLongWord ? pause * LONG_WORD_PAUSE : pause
+}
+
+function numberPause(token: Token): number {
+  if (!isNumber(token.text)) return 1
+  return Math.min(MAX_NUMBER_PAUSE, 1 + NUMBER_PAUSE_PER_DIGIT * digitCount(token.text))
 }
