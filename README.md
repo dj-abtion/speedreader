@@ -32,9 +32,9 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. To share it, send people [the in-app guide](https://dj-abtion.github.io/speedreader/#claude), which is also linked from the home screen's footer as "Use with Claude". Install it one of two ways:
 
-- **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change.
+- **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change. In a chat the skill is called `speedread`, so type `/speedread` or just ask Claude to speed-read its reply.
 
-- **Claude Code CLI on your own machine:** this repo is also a plugin marketplace. Run the two commands one at a time; the skill then shows as `didread:speedread` in the `/` menu and updates itself.
+- **Claude Code CLI on your own machine:** this repo is also a plugin marketplace. Run the two commands one at a time; the skill then shows as `didread:speedread` in the `/` menu and updates itself. Plugins only load in Claude Code (the terminal, or the Code tab in Claude Desktop), not in the Claude app's chats; for those, upload the zip as above.
 
   ```sh
   claude plugin marketplace add dj-abtion/speedreader
