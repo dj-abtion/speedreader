@@ -47,6 +47,7 @@
       replies with a link that opens that answer here.
     </p>
     <p class="muted">The text travels inside the link and never goes to a server.</p>
+    <p class="muted">At Abtion? You already have it through Brewale, so there's nothing to install.</p>
   </div>
 
   <section>

@@ -32,6 +32,8 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 The skill folder is self-contained: `SKILL.md` plus a dependency-free Node script. To share it, send people [the in-app guide](https://dj-abtion.github.io/speedreader/#claude), which is also linked from the home screen's footer as "Use with Claude". Install it one of two ways:
 
+**At Abtion?** You already have the skill through [Brewale](#brewale-abtion-colleagues). Don't also add a copy from the organization's skill library or upload the zip, or Claude ends up with two `speedread` skills. The Claude Code plugin is optional (see below).
+
 - **Every session, including the Claude app and cloud sessions:** download [speedread.zip](https://github.com/dj-abtion/speedreader/releases/download/speedread-skill/speedread.zip), then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on. Skills on your account are synced into every Claude Code cloud session. `.github/workflows/skill-release.yml` rebuilds the zip whenever the skill changes on `main`, so the link always gives the current version. Uploaded skills don't update themselves: upload the new zip to pick up a change. In a chat the skill is called `speedread`, so type `/speedread` or just ask Claude to speed-read its reply.
 
 - **Claude Code CLI on your own machine:** this repo is also a plugin marketplace. Run the two commands one at a time; the skill then shows as `didread:speedread` in the `/` menu and updates itself. Plugins only load in Claude Code (the terminal, or the Code tab in Claude Desktop), not in the Claude app's chats; for those, upload the zip as above.
@@ -45,7 +47,7 @@ The plugin was called `speedread` before; if you installed it under that name, r
 
 ### Brewale (Abtion colleagues)
 
-The skill is also published to Abtion's Brewale as `speedread`, so colleagues' agents pick it up with nothing to install. Brewale serves the instructions, and the agent downloads the script from `https://dj-abtion.github.io/speedreader/speedread.mjs`, which every deploy publishes from `plugins/speedread/skills/speedread/speedread.mjs`. Script changes therefore reach colleagues once they're merged and deployed, with no Brewale update. The Brewale skill also bundles a copy of the script as a fallback for sessions that can't reach the site.
+The skill is published to Abtion's Brewale as `speedread`, so colleagues' agents pick it up with nothing to install. Brewale replaces the copy that used to be shared through the organization's skill library in Claude. In Claude Code, the Brewale entry in the `/` menu (`/claude.ai brewale-abtion-mcp:speedread`) fails with "Unknown command", because Claude Code cuts the name at the space. Ask for it in words instead ("speedread that"), or install the Claude Code plugin above for a working `/didread:speedread`. Brewale serves the instructions, and the agent downloads the script from `https://dj-abtion.github.io/speedreader/speedread.mjs`, which every deploy publishes from `plugins/speedread/skills/speedread/speedread.mjs`. Script changes therefore reach colleagues once they're merged and deployed, with no Brewale update. The Brewale skill also bundles a copy of the script as a fallback for sessions that can't reach the site.
 
 The Brewale instructions live in [`brewale/speedread.md`](brewale/speedread.md). When you change them, publish a new version of the `speedread` skill in Brewale with that file as the body. Refreshing the bundled fallback copy at the same time is good practice.
 
