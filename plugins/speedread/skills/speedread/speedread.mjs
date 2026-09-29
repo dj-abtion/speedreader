@@ -5,6 +5,11 @@
 //   node speedread.mjs            last reply before the current prompt
 //   node speedread.mjs --back 2   the reply before that
 //   node speedread.mjs --stdin    text piped in instead
+//   node speedread.mjs --no-open  only print the link
+//
+// On the user's own computer it also opens the link in the browser, since a terminal may not make
+// the long link clickable.
+import { spawn } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -139,19 +144,56 @@ function findTranscript(sessionId) {
 /**
  * @param {string} text
  * @param {string} link
+ * @param {boolean} [opened]
  */
-export function summary(text, link) {
+export function summary(text, link, opened = false) {
   const words = text.split(/\s+/).filter(Boolean).length
   const minutes = Math.max(1, Math.round(words / WORDS_PER_MINUTE))
-  return `[⚡ Speed-read this reply](${link}) · ${words.toLocaleString('en')} words, about ${minutes} min at ${WORDS_PER_MINUTE} wpm`
+  const line = `[⚡ Speed-read this reply](${link}) · ${words.toLocaleString('en')} ${words === 1 ? 'word' : 'words'}, about ${minutes} min at ${WORDS_PER_MINUTE} wpm`
+  return opened ? `${line} · opened in your browser` : line
+}
+
+/**
+ * The command that opens a link in the user's browser, or null where there is no browser of theirs
+ * to open: a cloud session, an SSH login, or a machine without a display.
+ * @param {string} url
+ * @param {string} [platform]
+ * @param {Record<string, string | undefined>} [env]
+ * @returns {[string, string[]] | null}
+ */
+export function browserCommand(url, platform = process.platform, env = process.env) {
+  const remote = env.CLAUDE_CODE_REMOTE && env.CLAUDE_CODE_REMOTE !== 'false'
+  if (remote || env.SSH_CONNECTION) return null
+  if (platform === 'darwin') return ['open', [url]]
+  if (platform === 'win32') return ['rundll32', ['url.dll,FileProtocolHandler', url]]
+  if (env.DISPLAY || env.WAYLAND_DISPLAY) return ['xdg-open', [url]]
+  return null
+}
+
+/**
+ * @param {string} url
+ * @returns {Promise<boolean>}
+ */
+function openInBrowser(url) {
+  const command = browserCommand(url)
+  if (!command) return Promise.resolve(false)
+  return new Promise((resolve) => {
+    const child = spawn(command[0], command[1], { detached: true, stdio: 'ignore' })
+    child.on('error', () => resolve(false))
+    child.on('spawn', () => {
+      child.unref()
+      resolve(true)
+    })
+  })
 }
 
 /** @param {string[]} argv */
 function parseArgs(argv) {
-  const args = { back: 1, stdin: false, transcript: /** @type {string | null} */ (null) }
+  const args = { back: 1, stdin: false, open: true, transcript: /** @type {string | null} */ (null) }
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--back') args.back = Number(argv[++i])
     else if (argv[i] === '--stdin') args.stdin = true
+    else if (argv[i] === '--no-open') args.open = false
     else if (argv[i] === '--transcript') args.transcript = argv[++i]
     else throw new Error(`Unknown option: ${argv[i]}`)
   }
@@ -159,7 +201,7 @@ function parseArgs(argv) {
   return args
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2))
   let text
   if (args.stdin) {
@@ -170,14 +212,14 @@ function main() {
     text = lastReply(readTranscript(transcript), args.back)
   }
   if (!text) throw new Error('There is no earlier reply to link to.')
-  console.log(summary(text, readerLink(text, process.env.SPEEDREADER_URL ?? DEFAULT_APP_URL)))
+  const link = readerLink(text, process.env.SPEEDREADER_URL ?? DEFAULT_APP_URL)
+  const opened = args.open && (await openInBrowser(link))
+  console.log(summary(text, link, opened))
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  try {
-    main()
-  } catch (error) {
+  main().catch((error) => {
     console.error(error instanceof Error ? error.message : error)
     process.exit(1)
-  }
+  })
 }
