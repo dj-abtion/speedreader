@@ -17,6 +17,8 @@ Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/
    node "${CLAUDE_SKILL_DIR}/speedread.mjs" --back 1
    ```
 
+   If `CLAUDE_SKILL_DIR` is empty, as in a chat in the Claude app, use the folder you read this SKILL.md from instead (usually `/mnt/skills/user/speedread`).
+
    Pass `--back N` to go N replies back. Use the number the user gave, e.g. `/speedread 2`, or 1 when they gave none. The script reads this session's transcript and takes the final text of that reply, leaving out narration between tool calls. Earlier link requests and their link replies don't count, so `/speedread 2` straight after `/speedread` means the reply before the first link.
 
    On the user's own computer the script also opens the link in their browser and says so at the end of its line. It skips that in cloud sessions and over SSH. Pass `--no-open` if the user asks for just the link.
@@ -25,7 +27,7 @@ Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/
 
 ## When the script can't read the transcript
 
-This happens outside Claude Code, or when the script says it couldn't find the transcript. Use `--stdin` and pass it the reply's text exactly as you wrote it, Markdown included:
+This happens outside Claude Code (e.g. a chat in the Claude app), or when the script says it couldn't find the transcript. Use `--stdin` and pass it the reply's text exactly as you wrote it, Markdown included:
 
 ```sh
 node "${CLAUDE_SKILL_DIR}/speedread.mjs" --stdin <<'SPEEDREAD_EOF'

@@ -60,12 +60,13 @@
       <li>Choose the <code>speedread.zip</code> you downloaded.</li>
       <li>Make sure code execution is turned on.</li>
     </ol>
+    <p class="muted">In a chat the command is <code>/speedread</code>, not <code>didread:speedread</code>.</p>
     <p class="muted">Uploaded skills don't update themselves. Download and upload again to get a newer version.</p>
   </section>
 
   <section>
     <h2>Claude Code in a terminal</h2>
-    <p>Run these one at a time. The skill then shows as <code>didread:speedread</code> and keeps itself up to date.</p>
+    <p>Run these one at a time. The skill then shows as <code>didread:speedread</code> and keeps itself up to date. This works in Claude Code only, not in the Claude app's chats.</p>
     <ul>
       {#each CLI_COMMANDS as command (command)}
         <li class="command">
