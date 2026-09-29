@@ -33,6 +33,10 @@ describe('chunkTokens', () => {
     }
   })
 
+  it('shows numbers on their own', () => {
+    expect(texts('we sold 1,200 units in 2026 alone', 3)).toEqual(['we sold', '1,200', 'units in', '2026', 'alone'])
+  })
+
   it('covers every token exactly once, in order', () => {
     const tokens = tokenize('The quick brown fox, it jumps. Over the lazy dog again and again.')
     const chunks = chunkTokens(tokens, 3)

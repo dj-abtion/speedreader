@@ -6,7 +6,7 @@ const sample = tokenize(
   Array.from(
     { length: 40 },
     (_, i) =>
-      `Paragraph ${i} starts here, and it continues with extraordinarily long words; then it ends. Short one!`,
+      `Paragraph number ${i % 2 ? 'one' : 'two'} starts here, and it continues with extraordinarily long words; then it ends. Short one!`,
   ).join('\n\n'),
 )
 
@@ -25,6 +25,20 @@ describe('weights', () => {
   it('gives long words extra time', () => {
     const [short, long] = weights(tokenize('cat elephantine'))
     expect(long).toBeGreaterThan(short)
+  })
+
+  it('gives numbers extra time that grows with their digits', () => {
+    const [word, short, long] = weights(tokenize('word 12 3,847,221 end'))
+    expect(short).toBeGreaterThan(word)
+    expect(long).toBeGreaterThan(short)
+    expect(long).toBeCloseTo(word * 2, 10)
+  })
+
+  it('adds time for numbers instead of rushing the words around them', () => {
+    const words = weights(tokenize('one aaa two bbb three ccc four dddd'))
+    const withNumbers = weights(tokenize('one 1,200 two 3.5 three 40% four 2026'))
+    for (const i of [0, 2, 4, 6]) expect(withNumbers[i]).toBe(words[i])
+    expect(withNumbers.reduce((a, b) => a + b, 0)).toBeGreaterThan(words.length)
   })
 
   it('averages to exactly 1 so WPM is the average rate', () => {
