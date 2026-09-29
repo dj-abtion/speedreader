@@ -1,0 +1,42 @@
+name: Skill release
+
+# Keeps one release, tagged speedread-skill, whose speedread.zip is always the current skill, so
+# the download link in the README never changes. Recreating it moves the tag to the new commit.
+on:
+  push:
+    branches: [main]
+    paths:
+      - plugins/speedread/skills/speedread/**
+      - .github/workflows/skill-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: skill-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: speedread-skill
+    steps:
+      - uses: actions/checkout@v7
+      - name: Zip the skill folder
+        run: cd plugins/speedread/skills && zip -X -r "$RUNNER_TEMP/speedread.zip" speedread
+      - name: Replace the release
+        run: |
+          gh release delete "$TAG" --cleanup-tag --yes || true
+          gh release create "$TAG" "$RUNNER_TEMP/speedread.zip" \
+            --target "$GITHUB_SHA" \
+            --title "/speedread skill" \
+            --latest \
+            --notes "The \`/speedread\` skill for Claude, built from ${GITHUB_SHA::7}.
+
+          **Claude app, web or cloud sessions:** download \`speedread.zip\`, then in Claude open Customize → Skills → + → Create skill → Upload a skill and choose it. Code execution must be turned on.
+
+          **Claude Code in a terminal:** skip the zip and run
+          \`/plugin marketplace add dj-abtion/speedreader\`, then \`/plugin install speedread@speedreader\`."
