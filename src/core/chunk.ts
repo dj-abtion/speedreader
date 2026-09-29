@@ -1,4 +1,4 @@
-import { isNumber } from './number'
+import { isNumber, isUnit } from './number'
 import type { Token } from './tokenize'
 
 export const MAX_CHUNK_LENGTH = 18
@@ -11,7 +11,8 @@ export interface Chunk {
 
 // Chunks stop at any clause, sentence or paragraph end so pauses and sentence navigation keep
 // working, and at MAX_CHUNK_LENGTH characters so a chunk still fits on a phone screen.
-// Numbers get a flash of their own, as reading one alongside words is too much at once.
+// Numbers get a flash of their own, as reading one alongside words is too much at once,
+// apart from a unit straight after them ("25 km"), which is part of the number.
 export function chunkTokens(tokens: Token[], size: number): Chunk[] {
   const chunks: Chunk[] = []
   let start = 0
@@ -19,7 +20,7 @@ export function chunkTokens(tokens: Token[], size: number): Chunk[] {
     let end = start + 1
     let length = tokens[start].text.length
     while (end - start < size && end < tokens.length && !endsBreak(tokens[end - 1])) {
-      if (isNumber(tokens[end - 1].text) || isNumber(tokens[end].text)) break
+      if (!joinsAroundNumbers(tokens[start], tokens[end - 1], tokens[end])) break
       const next = length + 1 + tokens[end].text.length
       if (next > MAX_CHUNK_LENGTH) break
       length = next
@@ -47,6 +48,11 @@ export function chunkAt(chunks: Chunk[], index: number): number {
     else high = mid - 1
   }
   return low
+}
+
+function joinsAroundNumbers(first: Token, previous: Token, next: Token): boolean {
+  if (isNumber(first.text)) return previous === first && isUnit(next.text)
+  return !isNumber(next.text)
 }
 
 function endsBreak(token: Token): boolean {

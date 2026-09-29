@@ -37,6 +37,16 @@ describe('chunkTokens', () => {
     expect(texts('we sold 1,200 units in 2026 alone', 3)).toEqual(['we sold', '1,200', 'units in', '2026', 'alone'])
   })
 
+  it('keeps a unit with its number', () => {
+    expect(texts('we ran 25 km in 2 hrs today', 3)).toEqual(['we ran', '25 km', 'in', '2 hrs', 'today'])
+    expect(texts('it rose 40 % after', 2)).toEqual(['it rose', '40 %', 'after'])
+  })
+
+  it('joins nothing but a unit to a number', () => {
+    expect(texts('eat 5 a day', 3)).toEqual(['eat', '5', 'a day'])
+    expect(texts('25 km more', 1)).toEqual(['25', 'km', 'more'])
+  })
+
   it('covers every token exactly once, in order', () => {
     const tokens = tokenize('The quick brown fox, it jumps. Over the lazy dog again and again.')
     const chunks = chunkTokens(tokens, 3)
