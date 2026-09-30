@@ -1,4 +1,5 @@
-import { isNumber, isUnit } from './number'
+import { isNumber, isUnit, numberParts } from './number'
+import { numberPartPauses } from './timing'
 import type { Token } from './tokenize'
 
 export const MAX_CHUNK_LENGTH = 18
@@ -7,12 +8,17 @@ export const MAX_CHUNK_LENGTH = 18
 export interface Chunk {
   start: number
   end: number
+  // A large number is read over several chunks: each shows `text`, one part of the number,
+  // for `share` of the number's time.
+  text?: string
+  share?: number
 }
 
 // Chunks stop at any clause, sentence or paragraph end so pauses and sentence navigation keep
 // working, and at MAX_CHUNK_LENGTH characters so a chunk still fits on a phone screen.
 // Numbers get a flash of their own, as reading one alongside words is too much at once,
-// apart from a unit straight after them ("25 km"), which is part of the number.
+// apart from a unit straight after them ("25 km"), which is part of the number and joins its
+// last part.
 export function chunkTokens(tokens: Token[], size: number): Chunk[] {
   const chunks: Chunk[] = []
   let start = 0
@@ -26,26 +32,45 @@ export function chunkTokens(tokens: Token[], size: number): Chunk[] {
       length = next
       end++
     }
-    chunks.push({ start, end })
+    const parts = numberParts(tokens[start].text)
+    if (parts) chunks.push(...numberChunks(tokens, { start, end }, parts))
+    else chunks.push({ start, end })
     start = end
   }
   return chunks
 }
 
+function numberChunks(tokens: Token[], { start, end }: Chunk, parts: string[]): Chunk[] {
+  const pauses = numberPartPauses(parts)
+  const total = pauses.reduce((sum, pause) => sum + pause, 0)
+  const unit = tokens.slice(start + 1, end).map((t) => ` ${t.text}`).join('')
+  return parts.map((part, i) => {
+    const isLast = i === parts.length - 1
+    return {
+      start,
+      end: isLast ? end : start + 1,
+      text: isLast ? part + unit : part,
+      share: pauses[i] / total,
+    }
+  })
+}
+
 export function chunkText(tokens: Token[], chunk: Chunk): string {
+  if (chunk.text !== undefined) return chunk.text
   return tokens
     .slice(chunk.start, chunk.end)
     .map((t) => t.text)
     .join(' ')
 }
 
+// The first chunk showing the token, so a number read in parts is always entered at its start.
 export function chunkAt(chunks: Chunk[], index: number): number {
   let low = 0
   let high = chunks.length - 1
   while (low < high) {
-    const mid = Math.ceil((low + high) / 2)
-    if (chunks[mid].start <= index) low = mid
-    else high = mid - 1
+    const mid = Math.floor((low + high) / 2)
+    if (chunks[mid].end > index) high = mid
+    else low = mid + 1
   }
   return low
 }

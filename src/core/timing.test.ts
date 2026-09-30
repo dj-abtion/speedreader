@@ -28,10 +28,15 @@ describe('weights', () => {
   })
 
   it('gives numbers extra time that grows with their digits', () => {
-    const [word, short, long] = weights(tokenize('word 12 3,847,221 end'))
+    const [word, short, long] = weights(tokenize('word 12 1234567 end'))
     expect(short).toBeGreaterThan(word)
     expect(long).toBeGreaterThan(short)
     expect(long).toBeCloseTo(word * 2, 10)
+  })
+
+  it('gives a number read in parts the time of each part', () => {
+    const [word, grouped] = weights(tokenize('word 3,847,221 end'))
+    expect(grouped).toBeCloseTo(word * (1.15 + 1.45 + 1.45), 10)
   })
 
   it('adds time for numbers instead of rushing the words around them', () => {

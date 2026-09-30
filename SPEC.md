@@ -55,7 +55,7 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
   - ×1.5 at the end of a clause (`, ; :` and dashes)
   - extra time for long words (> 8 characters)
   - longer pause at paragraph breaks
-  - ×(1 + 0.15 per digit) for numbers, up to ×2, instead of the long-word time
+  - ×(1 + 0.15 per digit) for numbers, up to ×2, instead of the long-word time; a number read in parts gets that for each part
 - Ramp-up: the first few seconds after pressing play run slower, then ease up to the target WPM.
 - Durations are normalized so a long text read at N WPM takes the same total time as N flat words per minute. Number time is added after normalizing, so a number-heavy text runs longer rather than rushing its words.
 - Playback loop: `requestAnimationFrame` plus elapsed-time checks against `performance.now()`. No drift, pauses naturally in background tabs.
@@ -94,6 +94,7 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 - 1, 2 or 3 words per flash; default 1, remembered in `localStorage`.
 - A chunk never runs past a clause, sentence or paragraph end, and stays within 18 characters, so pauses and sentence navigation are unchanged.
 - A number gets a chunk of its own, together with a unit straight after it (`25 km`, `40 %`, `100 kr`).
+- A number of a million or more, written with thousands separators, is read in parts: one flash per digit group with its scale word (`3,847,221` → `3 million`, `847 thousand`, `221`), skipping zero groups (`1,200,000` → `1 million`, `200 thousand`). A unit joins the last part. Groups separated by `.` get Danish scale words (`tusind`, `millioner`, `milliarder`), and groups separated by `,` get English ones. Smaller numbers, plain digit runs, dates and mixed separators are read whole. At any chunk size, the parts share the number's time and are entered at the first part.
 - A chunk is shown for the sum of its words' durations, so WPM stays the real average rate.
 - Multi-word chunks pivot about 30% of the way in (never on a space) and use a smaller font; the saved position stays a word index, so resuming works across chunk sizes.
 - Any word or chunk that would overflow its side of the frame is scaled down to fit.

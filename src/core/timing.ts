@@ -1,4 +1,4 @@
-import { digitCount, isNumber } from './number'
+import { digitCount, isNumber, numberParts } from './number'
 import type { Token } from './tokenize'
 
 const PARAGRAPH_PAUSE = 2.5
@@ -49,7 +49,18 @@ function rawWeight(token: Token): number {
   return isLongWord ? pause * LONG_WORD_PAUSE : pause
 }
 
+// A number read in parts gets the time of each part, as each is a flash of its own to read.
 function numberPause(token: Token): number {
   if (!isNumber(token.text)) return 1
-  return Math.min(MAX_NUMBER_PAUSE, 1 + NUMBER_PAUSE_PER_DIGIT * digitCount(token.text))
+  const parts = numberParts(token.text)
+  if (!parts) return digitPause(token.text)
+  return numberPartPauses(parts).reduce((sum, pause) => sum + pause, 0)
+}
+
+export function numberPartPauses(parts: string[]): number[] {
+  return parts.map(digitPause)
+}
+
+function digitPause(text: string): number {
+  return Math.min(MAX_NUMBER_PAUSE, 1 + NUMBER_PAUSE_PER_DIGIT * digitCount(text))
 }
