@@ -6,6 +6,10 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 
 - Installable, offline-capable **PWA**. Static files only — no backend, no accounts.
 - Hosted on **GitHub Pages**, deployed by GitHub Actions.
+- Once the library has a text, the home screen offers installing in a banner above the library: "Put Didread on your home screen. Works offline, one tap away", adding "and you can share text straight to it" on Android.
+  - Where the browser offers an install prompt (`beforeinstallprompt`, Chromium), **Install** opens it. The event is caught at startup, as it can arrive while the reader is open.
+  - On iPhone and iPad, which have no prompt to call, the banner gives the steps instead: tap Share, then Add to Home Screen.
+  - Elsewhere, and in the installed app, there's no banner. × hides it for good on that device (`localStorage`).
 
 ## Input
 

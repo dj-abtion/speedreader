@@ -5,6 +5,7 @@
   import { parseShare } from '../core/share'
   import type { Appearance } from './appearance'
   import AppearanceSettings from './AppearanceSettings.svelte'
+  import InstallBanner from './InstallBanner.svelte'
   import { isFinished, type LibraryDocument } from './library'
   import { loadWpm } from './settings'
   import { GUIDE_HASH } from './skill'
@@ -183,7 +184,9 @@
     <p class="notice">Saving isn't available in this browser, so texts and positions won't be kept.</p>
   {/if}
 
+  <!-- Offered once there's something in the library, so it never greets a first visit. -->
   {#if documents.length > 0}
+    <InstallBanner />
     <section>
       <div class="section-head">
         <h2>Library</h2>
