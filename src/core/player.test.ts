@@ -68,6 +68,24 @@ describe('Player', () => {
     expect(seen).toEqual([1, 2])
   })
 
+  it('shows each part of a large number in turn, in the number\'s time', () => {
+    const tokens = tokenize('a 3,847,221 b')
+    const shown: string[] = []
+    let endedAt: number | null = null
+    const player: Player = new Player({
+      tokens,
+      wpm: 600,
+      clock,
+      onTick: () => shown.push(player.chunk.text ?? ''),
+      onEnd: () => (endedAt = clock.time),
+    })
+    const expected = durations(weights(tokens), 600).reduce((a, b) => a + b, 0)
+    player.play()
+    clock.advance(expected + RAMP_MS)
+    expect(shown).toEqual(['3 million', '847 thousand', '221', ''])
+    expect(endedAt! - expected).toBeLessThan(RAMP_MS)
+  })
+
   it('stops advancing when paused and stops requesting frames', () => {
     const player = new Player({ tokens: tokenize('a b c d e f g h'), wpm: 600, clock })
     player.play()

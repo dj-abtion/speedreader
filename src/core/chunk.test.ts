@@ -42,6 +42,17 @@ describe('chunkTokens', () => {
     expect(texts('it rose 40 % after', 2)).toEqual(['it rose', '40 %', 'after'])
   })
 
+  it('reads a large number over several chunks, with its unit on the last', () => {
+    expect(texts('about 3,847,221 km away', 1)).toEqual(['about', '3 million', '847 thousand', '221', 'km', 'away'])
+    expect(texts('about 1.200.000 kr i alt', 3)).toEqual(['about', '1 million', '200 tusind kr', 'i alt'])
+  })
+
+  it('splits a large number\'s time between its chunks', () => {
+    const chunks = chunkTokens(tokenize('3,847,221'), 1)
+    expect(chunks.map((c) => [c.start, c.end])).toEqual([[0, 1], [0, 1], [0, 1]])
+    expect(chunks.reduce((sum, c) => sum + (c.share ?? 0), 0)).toBeCloseTo(1, 10)
+  })
+
   it('joins nothing but a unit to a number', () => {
     expect(texts('eat 5 a day', 3)).toEqual(['eat', '5', 'a day'])
     expect(texts('25 km more', 1)).toEqual(['25', 'km', 'more'])
@@ -70,5 +81,11 @@ describe('chunkAt', () => {
     expect(chunkAt(chunks, 1)).toBe(0)
     expect(chunkAt(chunks, 3)).toBe(1)
     expect(chunkAt(chunks, 4)).toBe(2)
+  })
+
+  it('finds the first chunk of a number read in parts', () => {
+    const chunks = chunkTokens(tokenize('a 3,847,221 b'), 1)
+    expect(chunkAt(chunks, 1)).toBe(1)
+    expect(chunkAt(chunks, 2)).toBe(4)
   })
 })

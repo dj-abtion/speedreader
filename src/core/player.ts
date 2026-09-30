@@ -145,10 +145,10 @@ export class Player {
   private readonly frame = (): void => {
     this.frameId = null
     const now = this.clock.now()
-    const startIndex = this.index
+    const startChunk = this.chunkIndex
     while (now >= this.nextAt) {
       if (this.atLastChunk) {
-        if (this.index !== startIndex) this.onTick(this.index)
+        if (this.chunkIndex !== startChunk) this.onTick(this.index)
         this.pause()
         this.onEnd()
         return
@@ -163,7 +163,7 @@ export class Player {
       }
       this.nextAt += this.currentDuration(this.nextAt)
     }
-    if (this.index !== startIndex) this.onTick(this.index)
+    if (this.chunkIndex !== startChunk) this.onTick(this.index)
     this.scheduleFrame()
   }
 
@@ -172,9 +172,9 @@ export class Player {
   }
 
   private currentDuration(at = this.startedAt): number {
-    const { start, end } = this.chunk
-    let total = 0
-    for (let i = start; i < end; i++) total += this.durations[i]
+    const { start, end, share = 1 } = this.chunk
+    let total = this.durations[start] * share
+    for (let i = start + 1; i < end; i++) total += this.durations[i]
     return total * rampMultiplier(at - this.startedAt)
   }
 
