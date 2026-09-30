@@ -263,3 +263,63 @@ test('serves the /speedread script next to the app', async ({ request }) => {
   expect(response.ok()).toBe(true)
   expect(await response.text()).toBe(readFileSync('plugins/speedread/skills/speedread/speedread.mjs', 'utf8'))
 })
+
+// Chromium only offers installing once its own checks pass, so the tests hand the app a stand-in
+// install prompt that records being shown.
+async function offerInstall(page: Page, outcome: 'accepted' | 'dismissed' = 'accepted') {
+  await page.evaluate((outcome) => {
+    const event = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+      prompt: async () => void ((window as unknown as { prompted: boolean }).prompted = true),
+      userChoice: Promise.resolve({ outcome }),
+    })
+    dispatchEvent(event)
+  }, outcome)
+}
+
+test('offers to install once the library has a text', async ({ page }) => {
+  await page.goto('./')
+  await offerInstall(page)
+  const banner = page.getByRole('complementary', { name: 'Install Didread' })
+  await expect(banner).toBeHidden()
+
+  await pasteAndRead(page, 'Something to keep.')
+  await page.keyboard.press('Escape')
+  await expect(banner).toContainText('Put Didread on your home screen.')
+  await expect(banner).toContainText('share text straight to it')
+
+  await banner.getByRole('button', { name: 'Install' }).click()
+  await expect.poll(() => page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true)
+  await expect(banner).toBeHidden()
+})
+
+test('remembers a dismissed install offer', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, 'Something to keep.')
+  await page.keyboard.press('Escape')
+  await offerInstall(page)
+  const banner = page.getByRole('complementary', { name: 'Install Didread' })
+  await banner.getByRole('button', { name: "Don't show again" }).click()
+  await expect(banner).toBeHidden()
+
+  await page.reload()
+  await offerInstall(page)
+  await expect(page.getByRole('button', { name: /^Something to keep/ })).toBeVisible()
+  await expect(banner).toBeHidden()
+})
+
+test.describe('on an iPhone', () => {
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+  })
+
+  test('explains how to add Didread to the home screen', async ({ page }) => {
+    await page.goto('./')
+    await pasteAndRead(page, 'Something to keep.')
+    await page.keyboard.press('Escape')
+    const banner = page.getByRole('complementary', { name: 'Install Didread' })
+    await expect(banner).toContainText('then Add to Home Screen.')
+    await expect(banner.getByRole('img', { name: 'Share' })).toBeVisible()
+    await expect(banner.getByRole('button', { name: 'Install' })).toHaveCount(0)
+  })
+})
