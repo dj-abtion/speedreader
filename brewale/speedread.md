@@ -24,9 +24,17 @@ Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/
 
    Pass `--back N` to go N replies back. Use the number the user gave, e.g. `/speedread 2`, or 1 when they gave none. The script reads this session's Claude Code transcript and takes the final text of that reply, leaving out narration between tool calls. Earlier link requests and their link replies don't count, so `/speedread 2` straight after `/speedread` means the reply before the first link.
 
+   The script finds this session's transcript by `CLAUDE_CODE_SESSION_ID`, which Claude Code sets. Without it, the script falls back to the most recently changed transcript, which can belong to another open session. So if that variable is empty, use `--stdin` instead (below).
+
    On the user's own computer the script also opens the link in their browser and says so at the end of its line. It skips that in cloud sessions and over SSH. Pass `--no-open` if the user asks for just the link.
 
-3. **Reply with exactly the one line the script prints** (a Markdown link, then the word count and reading time). Don't add anything before or after it, repeat the reply, or summarise it. The user wants to save reading time.
+3. **Reply with exactly the one line the script prints** (a Markdown link, then the word count and reading time), for example:
+
+   ```markdown
+   [⚡ Speed-read this reply](https://dj-abtion.github.io/speedreader/#t=…) · 412 words, about 1 min at 300 wpm
+   ```
+
+   Don't add anything before or after it, repeat the reply, or summarise it. The user wants to save reading time. The one exception: if a standing instruction requires a closing line, such as an organization's sign-off, put that on its own line after the link, and nothing else.
 
 ## When the script can't read the transcript
 
