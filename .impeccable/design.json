@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T12:55:18+00:00",
+  "title": "Design System: Didread",
+  "extensions": {
+    "colorMeta": {
+      "reading-lamp-amber": {
+        "role": "primary",
+        "displayName": "Reading-Lamp Amber (light)",
+        "canonical": "#c2410c",
+        "oklch": "oklch(55.3% 0.174 38.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.043 38.4)",
+          "oklch(26.4% 0.077 38.4)",
+          "oklch(37.9% 0.110 38.4)",
+          "oklch(49.3% 0.143 38.4)",
+          "oklch(60.7% 0.172 38.4)",
+          "oklch(72.1% 0.139 38.4)",
+          "oklch(83.6% 0.106 38.4)",
+          "oklch(95.0% 0.072 38.4)"
+        ]
+      },
+      "reading-lamp-amber-dark": {
+        "role": "primary",
+        "displayName": "Reading-Lamp Amber (dark)",
+        "canonical": "#ff8a4c",
+        "oklch": "oklch(75.1% 0.161 46.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.040 46.8)",
+          "oklch(26.4% 0.071 46.8)",
+          "oklch(37.9% 0.102 46.8)",
+          "oklch(49.3% 0.132 46.8)",
+          "oklch(60.7% 0.159 46.8)",
+          "oklch(72.1% 0.128 46.8)",
+          "oklch(83.6% 0.098 46.8)",
+          "oklch(95.0% 0.067 46.8)"
+        ]
+      },
+      "on-amber": {
+        "role": "primary",
+        "displayName": "On Amber (light)",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 80.0)",
+          "oklch(26.4% 0.000 80.0)",
+          "oklch(37.9% 0.000 80.0)",
+          "oklch(49.3% 0.000 80.0)",
+          "oklch(60.7% 0.000 80.0)",
+          "oklch(72.1% 0.000 80.0)",
+          "oklch(83.6% 0.000 80.0)",
+          "oklch(95.0% 0.000 80.0)"
+        ]
+      },
+      "on-amber-dark": {
+        "role": "primary",
+        "displayName": "On Amber (dark)",
+        "canonical": "#1a1208",
+        "oklch": "oklch(18.9% 0.023 72.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 72.3)",
+          "oklch(26.4% 0.010 72.3)",
+          "oklch(37.9% 0.014 72.3)",
+          "oklch(49.3% 0.019 72.3)",
+          "oklch(60.7% 0.023 72.3)",
+          "oklch(72.1% 0.018 72.3)",
+          "oklch(83.6% 0.014 72.3)",
+          "oklch(95.0% 0.010 72.3)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink (light)",
+        "canonical": "#1c1a17",
+        "oklch": "oklch(21.9% 0.007 78.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 78.2)",
+          "oklch(26.4% 0.003 78.2)",
+          "oklch(37.9% 0.004 78.2)",
+          "oklch(49.3% 0.005 78.2)",
+          "oklch(60.7% 0.006 78.2)",
+          "oklch(72.1% 0.005 78.2)",
+          "oklch(83.6% 0.004 78.2)",
+          "oklch(95.0% 0.003 78.2)"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark)",
+        "canonical": "#efece6",
+        "oklch": "oklch(94.4% 0.009 84.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 84.6)",
+          "oklch(26.4% 0.004 84.6)",
+          "oklch(37.9% 0.005 84.6)",
+          "oklch(49.3% 0.007 84.6)",
+          "oklch(60.7% 0.009 84.6)",
+          "oklch(72.1% 0.007 84.6)",
+          "oklch(83.6% 0.005 84.6)",
+          "oklch(95.0% 0.004 84.6)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted (light)",
+        "canonical": "#6b655c",
+        "oklch": "oklch(51.0% 0.016 78.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 78.2)",
+          "oklch(26.4% 0.007 78.2)",
+          "oklch(37.9% 0.010 78.2)",
+          "oklch(49.3% 0.013 78.2)",
+          "oklch(60.7% 0.016 78.2)",
+          "oklch(72.1% 0.013 78.2)",
+          "oklch(83.6% 0.010 78.2)",
+          "oklch(95.0% 0.007 78.2)"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted (dark)",
+        "canonical": "#a39d93",
+        "oklch": "oklch(69.8% 0.016 80.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 80.7)",
+          "oklch(26.4% 0.007 80.7)",
+          "oklch(37.9% 0.010 80.7)",
+          "oklch(49.3% 0.013 80.7)",
+          "oklch(60.7% 0.016 80.7)",
+          "oklch(72.1% 0.013 80.7)",
+          "oklch(83.6% 0.010 80.7)",
+          "oklch(95.0% 0.007 80.7)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper (light)",
+        "canonical": "#f6f3ee",
+        "oklch": "oklch(96.5% 0.007 80.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 80.7)",
+          "oklch(26.4% 0.003 80.7)",
+          "oklch(37.9% 0.005 80.7)",
+          "oklch(49.3% 0.006 80.7)",
+          "oklch(60.7% 0.007 80.7)",
+          "oklch(72.1% 0.006 80.7)",
+          "oklch(83.6% 0.004 80.7)",
+          "oklch(95.0% 0.003 80.7)"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Paper (dark)",
+        "canonical": "#141311",
+        "oklch": "oklch(18.7% 0.004 84.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.001 84.6)",
+          "oklch(26.4% 0.002 84.6)",
+          "oklch(37.9% 0.003 84.6)",
+          "oklch(49.3% 0.004 84.6)",
+          "oklch(60.7% 0.004 84.6)",
+          "oklch(72.1% 0.003 84.6)",
+          "oklch(83.6% 0.003 84.6)",
+          "oklch(95.0% 0.002 84.6)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface (light)",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 80.0)",
+          "oklch(26.4% 0.000 80.0)",
+          "oklch(37.9% 0.000 80.0)",
+          "oklch(49.3% 0.000 80.0)",
+          "oklch(60.7% 0.000 80.0)",
+          "oklch(72.1% 0.000 80.0)",
+          "oklch(83.6% 0.000 80.0)",
+          "oklch(95.0% 0.000 80.0)"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Surface (dark)",
+        "canonical": "#1e1c19",
+        "oklch": "oklch(22.8% 0.006 78.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 78.2)",
+          "oklch(26.4% 0.003 78.2)",
+          "oklch(37.9% 0.004 78.2)",
+          "oklch(49.3% 0.005 78.2)",
+          "oklch(60.7% 0.006 78.2)",
+          "oklch(72.1% 0.005 78.2)",
+          "oklch(83.6% 0.004 78.2)",
+          "oklch(95.0% 0.003 78.2)"
+        ]
+      },
+      "guide": {
+        "role": "neutral",
+        "displayName": "Guide (light)",
+        "canonical": "#d9d2c7",
+        "oklch": "oklch(86.6% 0.017 79.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 79.3)",
+          "oklch(26.4% 0.007 79.3)",
+          "oklch(37.9% 0.011 79.3)",
+          "oklch(49.3% 0.014 79.3)",
+          "oklch(60.7% 0.017 79.3)",
+          "oklch(72.1% 0.013 79.3)",
+          "oklch(83.6% 0.010 79.3)",
+          "oklch(95.0% 0.007 79.3)"
+        ]
+      },
+      "guide-dark": {
+        "role": "neutral",
+        "displayName": "Guide (dark)",
+        "canonical": "#3d3934",
+        "oklch": "oklch(34.7% 0.010 73.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.003 73.6)",
+          "oklch(26.4% 0.004 73.6)",
+          "oklch(37.9% 0.006 73.6)",
+          "oklch(49.3% 0.008 73.6)",
+          "oklch(60.7% 0.010 73.6)",
+          "oklch(72.1% 0.008 73.6)",
+          "oklch(83.6% 0.006 73.6)",
+          "oklch(95.0% 0.004 73.6)"
+        ]
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "Track (light)",
+        "canonical": "#ece6dc",
+        "oklch": "oklch(92.7% 0.015 80.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 80.7)",
+          "oklch(26.4% 0.007 80.7)",
+          "oklch(37.9% 0.009 80.7)",
+          "oklch(49.3% 0.012 80.7)",
+          "oklch(60.7% 0.015 80.7)",
+          "oklch(72.1% 0.012 80.7)",
+          "oklch(83.6% 0.009 80.7)",
+          "oklch(95.0% 0.006 80.7)"
+        ]
+      },
+      "track-dark": {
+        "role": "neutral",
+        "displayName": "Track (dark)",
+        "canonical": "#2e2b27",
+        "oklch": "oklch(29.1% 0.008 75.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 75.3)",
+          "oklch(26.4% 0.004 75.3)",
+          "oklch(37.9% 0.005 75.3)",
+          "oklch(49.3% 0.007 75.3)",
+          "oklch(60.7% 0.008 75.3)",
+          "oklch(72.1% 0.007 75.3)",
+          "oklch(83.6% 0.005 75.3)",
+          "oklch(95.0% 0.003 75.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The 'Did read' finish headline."
+      },
+      "headline": {
+        "displayName": "Wordmark",
+        "purpose": "The didread name, middle d in amber."
+      },
+      "stat": {
+        "displayName": "Stat",
+        "purpose": "Time saved this month on the home screen."
+      },
+      "stat-small": {
+        "displayName": "Stat Small",
+        "purpose": "Finish-screen figures."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles and button labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs and descriptions."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Progress, time left, counts (Muted, tabular)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase section heads (Muted)."
+      },
+      "reading-word": {
+        "displayName": "Reading Word",
+        "purpose": "One word per flash, scaled S/M/L/XL."
+      },
+      "reading-phrase": {
+        "displayName": "Reading Phrase",
+        "purpose": "Two- and three-word chunks."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Code block panel in the reader."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "chrome-fade",
+        "value": "opacity 300ms",
+        "purpose": "Reader controls fade out while playing and back on pause."
+      },
+      {
+        "name": "context-fade",
+        "value": "opacity 150ms",
+        "purpose": "Paused context sentence and hint."
+      },
+      {
+        "name": "check-draw",
+        "value": "600ms 150ms cubic-bezier(0.3, 0, 0.2, 1)",
+        "purpose": "Finish check draws itself in; off under reduced motion."
+      },
+      {
+        "name": "bubble-pop",
+        "value": "900ms ease (fade in 15%, hold to 75%, fade out)",
+        "purpose": "Keyboard speed/chunk confirmation while playing; off under reduced motion."
+      }
+    ],
+    "breakpoints": [],
+    "themes": {
+      "light": {
+        "selector": ":root"
+      },
+      "dark": {
+        "selector": "@media (prefers-color-scheme: dark) :root:not([data-theme='light']), :root[data-theme='dark']",
+        "suffix": "-dark"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one amber action per screen, e.g. Read clipboard.",
+      "html": "<button class=\"ds-btn-primary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"8\" y=\"3\" width=\"8\" height=\"4\" rx=\"1\"/><path d=\"M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2\"/></svg>Read clipboard</button>",
+      "css": ".ds-btn-primary{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;min-height:4rem;border:none;border-radius:.9rem;background:var(--accent,#c2410c);color:var(--on-accent,#fff);font:700 1.1rem 'Figtree Variable',system-ui,sans-serif;cursor:pointer}.ds-btn-primary svg{width:1.4rem;height:1.4rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-primary:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:2px}"
+    },
+    {
+      "name": "Action Button",
+      "kind": "button",
+      "refersTo": "button-action",
+      "description": "Full-width secondary action on Surface with a hairline.",
+      "html": "<button class=\"ds-btn-action\">Paste text</button>",
+      "css": ".ds-btn-action{width:100%;min-height:3rem;padding:.5rem .9rem;border:1px solid var(--guide,#d9d2c7);border-radius:.9rem;background:var(--surface,#fff);color:var(--text,#1c1a17);font:600 1rem 'Figtree Variable',system-ui,sans-serif;cursor:pointer}.ds-btn-action:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:2px}.ds-btn-action:disabled{opacity:.4;cursor:default}"
+    },
+    {
+      "name": "Round Icon Button",
+      "kind": "button",
+      "refersTo": "button-round",
+      "description": "Transparent 2.75rem circle for Aa, close, delete and sentence skips.",
+      "html": "<button class=\"ds-btn-round\" aria-label=\"Appearance\">Aa</button>",
+      "css": ".ds-btn-round{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;padding:0;border:1px solid var(--guide,#d9d2c7);border-radius:50%;background:transparent;color:var(--text,#1c1a17);font:600 1rem 'Figtree Variable',system-ui,sans-serif;cursor:pointer}.ds-btn-round:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:2px}"
+    },
+    {
+      "name": "Play Button",
+      "kind": "custom",
+      "refersTo": "button-play",
+      "description": "The 4.5rem amber circle at the heart of the paused reader.",
+      "html": "<button class=\"ds-play\" aria-label=\"Play\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 5.5v13l10.5-6.5z\"/></svg></button>",
+      "css": ".ds-play{display:flex;align-items:center;justify-content:center;width:4.5rem;height:4.5rem;padding:0;border:none;border-radius:50%;background:var(--accent,#c2410c);color:var(--on-accent,#fff);cursor:pointer}.ds-play svg{width:1.75rem;height:1.75rem;fill:currentColor}.ds-play:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:3px}"
+    },
+    {
+      "name": "Speed Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "WPM readout between − and + steps; tabular numbers.",
+      "html": "<div class=\"ds-speed\"><button class=\"ds-step\" aria-label=\"Slower\">−</button><span class=\"ds-pill\">300 wpm</span><button class=\"ds-step\" aria-label=\"Faster\">+</button></div>",
+      "css": ".ds-speed{display:flex;align-items:center;gap:.25rem;font-family:'Figtree Variable',system-ui,sans-serif;color:var(--text,#1c1a17)}.ds-step{width:2.75rem;height:2.75rem;padding:0;border:none;border-radius:50%;background:transparent;color:inherit;font:600 1.35rem inherit;cursor:pointer}.ds-step:focus-visible{outline:2px solid var(--accent,#c2410c)}.ds-pill{min-width:6.5rem;padding:.5rem .9rem;border-radius:999px;background:var(--surface,#fff);text-align:center;font-weight:600;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Library Card",
+      "kind": "card",
+      "refersTo": "library-card",
+      "description": "A text in the library: two-line title, progress bar, meta.",
+      "html": "<div class=\"ds-card\"><span class=\"ds-card-title\">How the optimal recognition point keeps the eye still</span><span class=\"ds-bar\"><span style=\"width:42%\"></span></span><span class=\"ds-meta\"><span>1,240 words</span><span>42% · 3 min left</span></span></div>",
+      "css": ".ds-card{display:flex;flex-direction:column;gap:.75rem;padding:1rem;border:1px solid transparent;border-radius:1rem;background:var(--surface,#fff);color:var(--text,#1c1a17);font-family:'Figtree Variable',system-ui,sans-serif}.ds-card-title{font-weight:600;line-height:1.35}.ds-bar{display:block;height:.375rem;border-radius:.2rem;background:var(--track,#ece6dc);overflow:hidden}.ds-bar span{display:block;height:100%;background:var(--accent,#c2410c)}.ds-meta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted,#6b655c);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "Paste-text area on Surface with a hairline.",
+      "html": "<label class=\"ds-field\"><span>Paste text</span><textarea rows=\"4\" placeholder=\"Paste something long…\"></textarea></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:.6rem;font-family:'Figtree Variable',system-ui,sans-serif}.ds-field span{font-size:.9rem;color:var(--muted,#6b655c)}.ds-field textarea{font:inherit;padding:.75rem;border:1px solid var(--guide,#d9d2c7);border-radius:.9rem;background:var(--surface,#fff);color:var(--text,#1c1a17);resize:vertical}.ds-field textarea:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:1px}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segment-selected",
+      "description": "Theme / font / size picker in the Aa panel.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\" aria-label=\"Theme\"><label><input type=\"radio\" name=\"ds-theme\">Light</label><label><input type=\"radio\" name=\"ds-theme\">Dark</label><label><input type=\"radio\" name=\"ds-theme\" checked>System</label></div>",
+      "css": ".ds-seg{display:flex;font-family:'Figtree Variable',system-ui,sans-serif;color:var(--text,#1c1a17)}.ds-seg label{padding:.4rem .75rem;border:1px solid var(--guide,#d9d2c7);background:var(--surface,#fff);cursor:pointer}.ds-seg label+label{border-left:none}.ds-seg label:first-of-type{border-radius:.5rem 0 0 .5rem}.ds-seg label:last-of-type{border-radius:0 .5rem .5rem 0}.ds-seg label:has(input:checked){background:var(--accent,#c2410c);border-color:var(--accent,#c2410c);color:var(--surface,#fff)}.ds-seg label:has(input:focus-visible){outline:2px solid var(--accent,#c2410c);outline-offset:2px}.ds-seg input{position:absolute;width:1px;height:1px;opacity:0}"
+    },
+    {
+      "name": "Focal Word",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The reading frame: pivot column 40% across, guide ticks, amber pivot letter.",
+      "html": "<div class=\"ds-frame\"><span class=\"ds-before\">re</span><span class=\"ds-pivot\">a</span><span class=\"ds-after\">ding</span></div>",
+      "css": ".ds-frame{position:relative;display:grid;grid-template-columns:minmax(0,2fr) auto minmax(0,3fr);align-items:baseline;width:100%;padding:.5em 0;font:clamp(2.25rem,9vw,4.5rem)/1.2 system-ui,sans-serif;color:var(--text,#1c1a17);white-space:pre}.ds-frame::before,.ds-frame::after{content:'';position:absolute;left:40%;width:2px;height:.35em;background:var(--guide,#d9d2c7)}.ds-frame::before{top:0}.ds-frame::after{bottom:0}.ds-before{text-align:right}.ds-pivot{color:var(--accent,#c2410c)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Focal Point",
+    "overview": "**Creative North Star: \"The Focal Point\"**\n\nEverything in Didread serves one fixed point: the spot slightly left of centre where each word lands, with its pivot letter lit in Reading-Lamp Amber and two thin guide ticks holding the column. The eye never moves, so the interface around that point has one job: get there quickly and then get out of the way. The library, the finish screen and the settings are calm frames around that point, not destinations in their own right.\n\nThe mood is calm. Neutrals are warm paper by day and warm dark by night, chrome is quiet and low-contrast, and controls fade away completely while words are playing. Amber appears only where attention belongs: the pivot letter, the one main action, progress, and the finish. The system is flat and soft-edged, built for thumbs on a phone first and keys on a desktop second.\n\nThe system avoids three things. It is not a productivity app, so no gradients, glows, glassmorphism or dashboard chrome. It is not a game, so no streaks, badges, confetti or leaderboards; finishing is a quiet win. And it is never cold, so no blue-greys, pure black or neutral grey palettes.",
+    "keyCharacteristics": [
+      "One fixed focal column (pivot at 40% across), held by guide ticks.",
+      "A single accent, Reading-Lamp Amber, used sparingly and always with meaning.",
+      "Warm-tinted neutrals in both themes; theme follows the system, with a light/dark override.",
+      "Flat surfaces; depth comes from paper versus surface tone and hairline borders, never shadows.",
+      "Soft, thumb-sized controls (2.75rem minimum), with exactly one filled amber action per screen.",
+      "Controls fade while playing (300ms) and return on pause."
+    ],
+    "rules": [
+      {
+        "name": "The One Light Rule",
+        "body": "Amber is the only chromatic colour in the interface. If something is amber, it is either the focal point, the next action, or progress. Never use it as decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "Every neutral is tinted towards amber (hue about 75–85 in OKLCH). No `#000`, `#fff` text on a dark ground, or blue-grey anywhere. Pure white appears only as the light-theme surface and as text on amber.",
+        "section": "colors"
+      },
+      {
+        "name": "The Earned Display Rule",
+        "body": "Bricolage is used only for the brand name and for a number that celebrates the reader (time saved, finish stats). Headings for interface sections stay in small uppercase Figtree labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Every number that changes or sits in a column (WPM, percentages, minutes left, version, stats) uses `font-variant-numeric: tabular-nums` so it never jitters.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Column Rule",
+        "body": "The word frame is a three-column grid (`2fr | pivot | 3fr`) with the pivot column 40% across. Guide ticks sit exactly on that column. Never centre the word or move the pivot; a word that would overflow is scaled down with `--fit` instead.",
+        "section": "layout"
+      },
+      {
+        "name": "The Paper-and-Card Rule",
+        "body": "There are exactly two planes: Paper and Surface. If an element needs to stand out further, it gets amber (it's the action), not a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep the pivot column at 40% across, with guide ticks, for every word and chunk.",
+      "**Do** use Reading-Lamp Amber for one main action per screen, plus the pivot, progress and finish moments.",
+      "**Do** keep tap targets at least 2.75rem, and give the main action 3.25–4rem of height.",
+      "**Do** separate planes with tone (Paper and Surface) and 1px Guide hairlines.",
+      "**Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`) and bring it back on pause.",
+      "**Do** use tabular numbers for every changing figure.",
+      "**Do** respect `prefers-reduced-motion`: drop the bubble and check-drawing animations.",
+      "**Do** define every new colour for both themes on `:root`, and redefine it in both dark-mode blocks."
+    ],
+    "donts": [
+      "**Don't** add gradients, glows, glassmorphism, shadows or dashboard-style chrome.",
+      "**Don't** add streaks, badges, confetti, points or leaderboards. Finishing stays a quiet stamp and a drawn check.",
+      "**Don't** use cold greys, blue-greys, pure black backgrounds or white text on dark. Neutrals stay warm.",
+      "**Don't** introduce a second accent colour.",
+      "**Don't** use Bricolage for interface headings; keep it for the name and celebratory numbers.",
+      "**Don't** centre the reading word or animate it; words flash in place."
+    ]
+  }
+}
