@@ -53,3 +53,6 @@ plugins/speedread/skills/*.zip
 **/.impeccable/live/deferred-svelte-component-accepts.json
 **/.impeccable/live/*.png
 # impeccable-ignore-end
+
+# Claude Code per-machine settings (e.g. the Impeccable hook)
+.claude/settings.local.json
