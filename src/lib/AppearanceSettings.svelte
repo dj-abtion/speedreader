@@ -105,10 +105,12 @@
     border-radius: 0 0.5rem 0.5rem 0;
   }
 
+  /* The choice is shown in ink, not amber, so amber stays for the focal point and the main action. */
   label:has(input:checked) {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--background);
+    font-weight: 600;
   }
 
   /* The ring lifts above its neighbours, and turns ink on the amber selected segment. */
@@ -120,7 +122,7 @@
   }
 
   label:has(input:checked:focus-visible) {
-    outline-color: var(--text);
+    outline-color: var(--accent);
   }
 
   label.serif {

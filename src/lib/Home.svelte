@@ -7,7 +7,7 @@
   import type { Appearance } from './appearance'
   import AppearanceSettings from './AppearanceSettings.svelte'
   import InstallBanner from './InstallBanner.svelte'
-  import { isFinished, type LibraryDocument } from './library'
+  import { isDone, isFinished, type LibraryDocument } from './library'
   import { SAMPLE } from './sample'
   import { loadWpm } from './settings'
   import { GUIDE_HASH } from './skill'
@@ -26,6 +26,8 @@
     onRemove,
     deleted = null,
     onUndoDelete = () => {},
+    focusId = null,
+    onShowSample = () => {},
     onShowGuide,
   }: {
     documents: LibraryDocument[]
@@ -40,6 +42,8 @@
     onRemove: (doc: LibraryDocument) => void
     deleted?: LibraryDocument | null
     onUndoDelete?: () => void
+    focusId?: string | null
+    onShowSample?: (doc: NewDocument) => void
     onShowGuide: () => void
   } = $props()
 
@@ -52,7 +56,7 @@
   let showAppearance = $state(false)
   let inProgress = $derived(documents.filter((doc) => doc.position > 0 && !isFinished(doc)).length)
   // Unfinished texts lead, so the one to continue is never below a text that's already done.
-  let ordered = $derived([...documents].sort((a, b) => Number(isFinished(a)) - Number(isFinished(b))))
+  let ordered = $derived([...documents].sort((a, b) => Number(isDone(a)) - Number(isDone(b))))
   let textarea = $state<HTMLTextAreaElement>()
 
   async function togglePaste() {
@@ -108,6 +112,48 @@
     }
   }
 
+  // Reopens the sample if it's still in the library; otherwise it's read without being added back,
+  // since a help link shouldn't change the library.
+  function showSample() {
+    const saved = documents.find((doc) => doc.text === SAMPLE.text)
+    if (saved) onOpen(saved)
+    else onShowSample(SAMPLE)
+  }
+
+  // The install offer waits until Didread has delivered something: a first finished text.
+  let hasFinished = $derived(documents.some((doc) => doc.finishedAt !== undefined))
+  let settingsButton = $state<HTMLButtonElement>()
+
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Escape' || !showAppearance) return
+    showAppearance = false
+    settingsButton?.focus()
+  }
+
+  // Focus that fell to the page (its element went away) is put back where the reader was.
+  function focusLost(): boolean {
+    return !document.activeElement || document.activeElement === document.body
+  }
+
+  // Back from the reader, the finish screen or an Undo: focus returns to that text's card.
+  $effect(() => {
+    void documents
+    if (!focusId || !focusLost()) return
+    document.querySelector<HTMLElement>(`[data-doc-id="${CSS.escape(focusId)}"]`)?.focus({ preventScroll: true })
+  })
+
+  // When the Undo bar times out with focus on it, focus moves to the first card.
+  let hadUndo = false
+  $effect(() => {
+    if (deleted) {
+      hadUndo = true
+      return
+    }
+    if (!hadUndo) return
+    hadUndo = false
+    if (focusLost()) document.querySelector<HTMLElement>('.open')?.focus({ preventScroll: true })
+  })
+
   function percent(doc: LibraryDocument): number {
     return Math.floor((doc.position / Math.max(doc.tokenCount, 1)) * 100)
   }
@@ -120,7 +166,8 @@
 
   function finishedIn(doc: LibraryDocument): string {
     const words = `${formatCount(doc.tokenCount)} words`
-    return doc.readingMs ? `${words} in ${formatDuration(doc.readingMs)}` : words
+    const readingMs = doc.finishedReadingMs ?? doc.readingMs
+    return readingMs ? `${words} in ${formatDuration(readingMs)}` : words
   }
 
   // Deleting is instant and undoable, so there's no confirmation to get through first.
@@ -139,6 +186,8 @@
   })
 </script>
 
+<svelte:window onkeydown={onKeydown} />
+
 <div class="home">
   <header>
     <div class="brand">
@@ -155,6 +204,7 @@
     </div>
     <button
       class="round"
+      bind:this={settingsButton}
       onclick={() => (showAppearance = !showAppearance)}
       aria-label="Display settings"
       aria-expanded={showAppearance}>Aa</button
@@ -178,7 +228,7 @@
   <div class="inputs">
     {#if canReadClipboard}
       <!-- On an empty library the sample is the amber first step, since nothing may be copied yet. -->
-      <button type="button" class="primary" class:quiet={documents.length === 0} onclick={readClipboard}>
+      <button type="button" class="primary" class:quiet={documents.length === 0 || showPaste} onclick={readClipboard}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="8" y="2" width="8" height="4" rx="1" />
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -208,7 +258,8 @@
           placeholder="Paste text here…"
           autofocus={canReadClipboard}
         ></textarea>
-        <button type="submit" class:primary={!canReadClipboard} disabled={!text.trim()}>Read</button>
+        <!-- With the form open, its Read is the amber action and Read clipboard steps back. -->
+        <button type="submit" class="primary" disabled={!text.trim()}>Read</button>
       </form>
     {/if}
     {#if inputError}<p class="error" role="alert">{inputError}</p>{/if}
@@ -218,9 +269,7 @@
     <p class="notice">Saving isn't available in this browser, so texts and positions won't be kept.</p>
   {/if}
 
-  <!-- Offered once there's something in the library, so it never greets a first visit. -->
   {#if documents.length > 0}
-    <InstallBanner />
     <section>
       <div class="section-head">
         <h2>Library</h2>
@@ -228,9 +277,9 @@
       </div>
       <ul>
         {#each ordered as doc (doc.id)}
-          {@const done = isFinished(doc)}
+          {@const done = isDone(doc)}
           <li class:done>
-            <button class="open" onclick={() => onOpen(doc)}>
+            <button class="open" data-doc-id={doc.id} onclick={() => onOpen(doc)}>
               <span class="title">{doc.title}</span>
               {#if done}
                 <span class="meta">
@@ -243,7 +292,15 @@
               {:else}
                 <span class="bar" aria-hidden="true"><span style:width={`${percent(doc)}%`}></span></span>
                 <span class="meta">
-                  <span>{formatCount(doc.tokenCount)} words</span>
+                  <!-- Being read again: the stamp stays beside the new progress. -->
+                  {#if doc.finishedAt !== undefined}
+                    <span class="stamp">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                      Did read
+                    </span>
+                  {:else}
+                    <span>{formatCount(doc.tokenCount)} words</span>
+                  {/if}
                   <span>{status(doc)}</span>
                 </span>
               {/if}
@@ -255,6 +312,8 @@
         {/each}
       </ul>
     </section>
+    <!-- Offered after a first finished text, so it never asks before Didread has proved itself. -->
+    {#if hasFinished}<InstallBanner />{/if}
   {:else}
     <!-- A first visit gets a glimpse of the reader and a text to try it on. -->
     <section class="welcome" aria-labelledby="welcome-head">
@@ -285,6 +344,10 @@
         event.preventDefault()
         onShowGuide()
       }}>Use with Claude →</a>
+    <!-- The welcome goes once the library has texts, so its sample stays one tap away here. -->
+    {#if documents.length > 0}
+      <button type="button" class="how" onclick={showSample}>How it works</button>
+    {/if}
     <span class="version">
       {#if buildInfo.commit}
         <a href={`${REPOSITORY_URL}/commit/${buildInfo.commit}`} target="_blank" rel="noreferrer"
@@ -330,17 +393,20 @@
     height: min(3.25rem, 13vw);
   }
 
+  /* The mark takes the theme's colours: a Surface tile on paper, never a dark slab in light mode. */
   .logo .tile {
-    fill: #1e1c19;
+    fill: var(--surface);
+    stroke: var(--guide);
+    stroke-width: 12;
   }
 
   .logo .guide {
-    fill: #8f897f;
+    fill: var(--muted);
   }
 
   .logo .tick {
     fill: none;
-    stroke: #ff8a4c;
+    stroke: var(--accent);
     stroke-width: 46;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -353,7 +419,7 @@
 
   h1 {
     font-family: var(--display-font);
-    font-size: 1.9rem;
+    font-size: min(1.9rem, 9vw);
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1;
@@ -546,7 +612,8 @@
     flex-direction: column;
     gap: 0.75rem;
     width: 100%;
-    padding: 1rem 3.25rem 1rem 1rem;
+    /* Room for the delete button, capped so enlarged text still leaves the title its width. */
+    padding: 1rem min(3.25rem, 14vw) 1rem 1rem;
     border: 1px solid transparent;
     border-radius: 1rem;
     background: var(--surface);
@@ -625,8 +692,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: min(2.75rem, 12vw);
+    height: min(2.75rem, 12vw);
     padding: 0;
     border: none;
     border-radius: 50%;
@@ -780,6 +847,19 @@
   .claude {
     color: var(--text);
     font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--guide);
+    text-underline-offset: 0.2em;
+  }
+
+  .how {
+    min-height: 0;
+    margin: -0.7rem 0;
+    padding: 0.7rem 0;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: inherit;
     text-decoration: underline;
     text-decoration-color: var(--guide);
     text-underline-offset: 0.2em;

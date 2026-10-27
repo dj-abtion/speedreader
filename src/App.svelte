@@ -2,13 +2,14 @@
   import { onMount } from 'svelte'
   import { readableText, titleFromText, type NewDocument } from './core/document'
   import { decodeText, payloadFromHash } from './core/link'
+  import { MAX_WPM } from './core/player'
   import { parseShare } from './core/share'
   import { tokenize, type Token } from './core/tokenize'
   import { monthSummary } from './core/stats'
   import { applyAppearance, loadAppearance, saveAppearance, type Appearance } from './lib/appearance'
   import Finish from './lib/Finish.svelte'
   import Home from './lib/Home.svelte'
-  import { isFinished, openLibrary, type LibraryDocument } from './lib/library'
+  import { isDone, isFinished, openLibrary, type LibraryDocument } from './lib/library'
   import { loadFinishes, recordFinish } from './lib/readingLog'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
@@ -43,6 +44,10 @@
   let notice = $state('')
   // The last deleted text, kept briefly so it can be put back.
   let deleted = $state.raw<LibraryDocument | null>(null)
+  // The card to put focus back on when the library comes back, so keyboard users keep their place.
+  let focusId = $state<string | null>(null)
+  // A read can run a little faster than the top speed (ramp and rounding), but not much.
+  const PLAUSIBLE_PACE = 1.2
   let deletedTimer: ReturnType<typeof setTimeout> | undefined
   const UNDO_MS = 8000
   let appearance = $state(loadAppearance())
@@ -71,6 +76,7 @@
       storageAvailable = false
     }
     finished = null
+    notice = ''
     reading = { id, title: newDoc.title, tokens: tokenize(newDoc.text), position: 0, readingMs: 0 }
   }
 
@@ -93,6 +99,7 @@
   function open(doc: LibraryDocument) {
     const again = isFinished(doc)
     finished = null
+    notice = ''
     reading = {
       id: doc.id,
       title: doc.title,
@@ -120,6 +127,7 @@
     clearTimeout(deletedTimer)
     await library.restore(doc).catch(() => {})
     await refresh()
+    focusId = doc.id
   }
 
   function saveProgress(index: number, readingMs: number) {
@@ -130,6 +138,15 @@
     if (!reading) return
     const { id, title, tokens } = reading
     const total = reading.readingMs + readingMs
+    // Reaching the end faster than the reader can play means it was skipped through, not read:
+    // no stamp, no time saved, just back to the library with a word about why.
+    if (tokens.length / Math.max(total / 60_000, 1e-9) > MAX_WPM * PLAUSIBLE_PACE) {
+      reading = null
+      focusId = id
+      notice = "Skipped to the end, so it isn't counted as read."
+      await refresh()
+      return
+    }
     recordFinish({ at: Date.now(), words: tokens.length, readingMs: total })
     finishes = loadFinishes()
     navigator.vibrate?.(40)
@@ -138,7 +155,7 @@
     if (id) await library.markFinished(id, total).catch(() => {})
     await refresh()
     if (finished?.id === id) {
-      finished.next = documents.find((doc) => doc.id !== id && !isFinished(doc)) ?? null
+      finished.next = documents.find((doc) => doc.id !== id && !isDone(doc)) ?? null
     }
   }
 
@@ -150,13 +167,21 @@
   }
 
   async function backToLibrary() {
+    focusId = finished?.id ?? null
     finished = null
     await refresh()
   }
 
   async function exit() {
+    focusId = reading?.id ?? null
     reading = null
     await refresh()
+  }
+
+  // From the footer's How it works: the sample, read without adding it to the library again.
+  function showSample(doc: NewDocument) {
+    finished = null
+    reading = { id: null, title: doc.title, tokens: tokenize(doc.text), position: 0, readingMs: 0 }
   }
 
   // Shares normally arrive via the service worker's inbox with only a flag in the URL. Reading
@@ -244,6 +269,8 @@
       onRemove={remove}
       {deleted}
       onUndoDelete={undoDelete}
+      {focusId}
+      onShowSample={showSample}
       onShowGuide={openGuide}
     />
   {/if}

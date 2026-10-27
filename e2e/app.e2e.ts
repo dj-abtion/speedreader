@@ -8,6 +8,14 @@ const story = [
   ...Array.from({ length: 12 }, (_, i) => `Sentence number ${i} has a handful of words in it.`),
 ].join('\n')
 
+// Reads a short text to the end and returns to the library, for what waits on a first finish.
+async function finishAndReturn(page: Page, text: string) {
+  await pasteAndRead(page, text)
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('heading', { name: 'Did read' })).toBeVisible({ timeout: 10_000 })
+  await page.getByRole('button', { name: 'Library' }).click()
+}
+
 async function pasteAndRead(page: Page, text: string) {
   await page.getByRole('button', { name: 'Paste text' }).click()
   await page.getByLabel('Paste the text you want to read').fill(text)
@@ -202,6 +210,16 @@ test('celebrates a finished text and stamps it in the library', async ({ page })
 
   const card = page.getByRole('button', { name: /^Four short words/ })
   await expect(card).toContainText('Did read')
+
+  // Opening it again and leaving keeps the stamp.
+  await card.click()
+  await expect(page.locator('.frame')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(card).toContainText('Did read')
+
+  // Once the library has texts, the sample is still one tap away.
+  await page.getByRole('button', { name: 'How it works' }).click()
+  await expect(page.getByRole('heading', { name: 'How Didread works' })).toBeVisible()
 })
 
 test('confirms a speed change made while playing', async ({ page }) => {
@@ -278,14 +296,21 @@ async function offerInstall(page: Page, outcome: 'accepted' | 'dismissed' = 'acc
   }, outcome)
 }
 
-test('offers to install once the library has a text', async ({ page }) => {
+test('offers to install once a first text is finished', async ({ page }) => {
   await page.goto('./')
   await offerInstall(page)
   const banner = page.getByRole('complementary', { name: 'Install Didread' })
   await expect(banner).toBeHidden()
 
+  // A text in the library isn't enough; it waits until Didread has been used to the end.
   await pasteAndRead(page, 'Something to keep.')
   await page.keyboard.press('Escape')
+  await expect(banner).toBeHidden()
+
+  await pasteAndRead(page, 'Something to finish.')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('heading', { name: 'Did read' })).toBeVisible({ timeout: 10_000 })
+  await page.getByRole('button', { name: 'Library' }).click()
   await expect(banner).toContainText('Put Didread on your home screen.')
   await expect(banner).toContainText('share text straight to it')
 
@@ -296,8 +321,7 @@ test('offers to install once the library has a text', async ({ page }) => {
 
 test('remembers a dismissed install offer', async ({ page }) => {
   await page.goto('./')
-  await pasteAndRead(page, 'Something to keep.')
-  await page.keyboard.press('Escape')
+  await finishAndReturn(page, 'Something to keep.')
   await offerInstall(page)
   const banner = page.getByRole('complementary', { name: 'Install Didread' })
   await banner.getByRole('button', { name: "Don't show again" }).click()
@@ -317,8 +341,7 @@ test.describe('on an iPhone', () => {
 
   test('explains how to add Didread to the home screen', async ({ page }) => {
     await page.goto('./')
-    await pasteAndRead(page, 'Something to keep.')
-    await page.keyboard.press('Escape')
+    await finishAndReturn(page, 'Something to keep.')
     const banner = page.getByRole('complementary', { name: 'Install Didread' })
     await expect(banner).toContainText('then Add to Home Screen.')
     await expect(banner.getByRole('img', { name: 'Share' })).toBeVisible()
@@ -378,4 +401,15 @@ test('deletes a text at once and puts it back with Undo', async ({ page }) => {
 
   await expect(card).toContainText('%')
   await expect(undo).toHaveCount(0)
+})
+
+test("doesn't count a text skipped to the end as read", async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, story)
+  await page.getByRole('slider', { name: 'Position' }).fill('120')
+  await page.keyboard.press('Space')
+
+  await expect(page.getByText("Skipped to the end, so it isn't counted as read.")).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByRole('heading', { name: 'Did read' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^A Long Story/ })).not.toContainText('Did read')
 })
