@@ -366,7 +366,11 @@
       <h2 id="welcome-head">One word at a time, right where your eyes are</h2>
       <p>
         Words flash at a fixed point with one letter lit, so your eyes never have to move.
-        {canReadClipboard ? 'Copy something long, then tap Read clipboard.' : 'Paste something long to start.'}
+        {#if canReadClipboard}
+          Copy something long, {canOpenLinks ? 'or a link to it, ' : ''}then tap Read clipboard.
+        {:else}
+          Paste something long{canOpenLinks ? ', or a link to it,' : ''} to start.
+        {/if}
       </p>
       <button type="button" class="sample" onclick={() => onAdd(SAMPLE)}>Try a sample</button>
     </section>
