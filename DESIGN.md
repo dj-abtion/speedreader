@@ -150,6 +150,11 @@ components:
     textColor: "{colors.muted}"
     rounded: "{rounded.xl}"
     padding: "0.9rem 0.5rem 0.9rem 1.1rem"
+  link-prompt:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.muted}"
+    rounded: "{rounded.lg}"
+    padding: "1.1rem 1.1rem 1rem"
 ---
 
 # Design System: Didread
@@ -177,7 +182,7 @@ The system avoids three things. It is not a productivity app, so no gradients, g
 A warm, near-monochrome paper palette with a single amber light source.
 
 ### Primary
-- **Reading-Lamp Amber** (light `#c2410c`, dark `#ff8a4c`): the pivot letter of every flashed word, the "d" in the wordmark, the main action on each screen (Read clipboard, Play, Install, the finish screen's next step), progress fills, the "Did read" stamp, the self-drawing check, the time-saved figure, focus outlines and error text. In dark mode it shifts lighter and yellower to glow against the warm dark.
+- **Reading-Lamp Amber** (light `#c2410c`, dark `#ff8a4c`): the pivot letter of every flashed word, the "d" in the wordmark, the main action on each screen (Read clipboard, Play, Install, Open page, the finish screen's next step), progress fills, the "Did read" stamp, the self-drawing check, the time-saved figure, focus outlines and error text. In dark mode it shifts lighter and yellower to glow against the warm dark.
 - **On Amber** (light `#ffffff`, dark `#1a1208`): text and icons on amber fills. Dark mode uses a warm near-black, not white.
 
 ### Neutral
@@ -291,8 +296,11 @@ In the reader, Aa opens a sheet over the playback controls rather than above the
 ### Undo Bar
 Deleting a text needs no confirmation. A bar appears pinned 1rem above the bottom edge (Surface fill, Guide hairline, 1rem radius, at most 32rem wide): Muted "Deleted" with the title in Ink, ellipsed to one line, and an amber **Undo** text button at 2.75rem. It's a status region, takes focus from the vanished delete button, and goes after 8 seconds.
 
+### Link Prompt
+The first web link asks before its address leaves the device. Under any notice, a Surface card (Guide hairline, 1rem radius) carries an "Open example.com?" heading in Ink at 1.1rem, in sentence case rather than the uppercase section label, and breaking anywhere so a long host never overflows. Under it, one Muted paragraph says the page is fetched through Didread's own server, which sees the address and keeps nothing, and that it asks only once. **Open page** is the amber action at 3rem and takes focus; **Cancel** beside it is a Surface button of the same height, and the two wrap to stacked full-width buttons on narrow screens. While a page loads, the card gives way to one Muted status line, "Opening example.com…", with a Surface **Cancel** at 2.75rem on its right. Failures use the Muted notice line with a reason, never a dialog.
+
 ### First-visit Welcome
-An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and **Try a sample**, the screen's one amber action, which opens a short built-in text. While the library is empty, Read clipboard steps back to a Surface button, since a first visitor may have nothing copied.
+An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do ("Copy something long, or a link to it, then tap Read clipboard."), and **Try a sample**, the screen's one amber action, which opens a short built-in text. While the library is empty, Read clipboard steps back to a Surface button, since a first visitor may have nothing copied.
 
 ### Finish Check (signature)
 A 9rem mark: two Muted guide ticks, as in the reader, with an amber check between them that draws itself in (600ms, 150ms delay, `cubic-bezier(0.3, 0, 0.2, 1)`). It doesn't animate when reduced motion is requested.
