@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { formatClock, formatCount, formatRemaining } from '../core/format'
+  import { formatCount, formatDuration, formatRemaining } from '../core/format'
   import { AVERAGE_WPM, savedMs } from '../core/stats'
   import type { LibraryDocument } from './library'
   import { loadWpm } from './settings'
@@ -24,6 +24,9 @@
   } = $props()
 
   let primary: HTMLButtonElement | undefined = $state()
+  let saved = $derived(savedMs(words, readingMs))
+  // Under a second rounds to nothing, so a slower-than-average read leads with its own time.
+  let savedSomething = $derived(saved >= 1000)
 
   function nextTimeLeft(doc: LibraryDocument): string {
     const wordsLeft = Math.max(doc.tokenCount - doc.position, 0)
@@ -51,21 +54,15 @@
   </div>
 
   <div class="stats">
-    <dl>
-      <div>
-        <dt>words</dt>
-        <dd>{formatCount(words)}</dd>
-      </div>
-      <div>
-        <dt>reading time</dt>
-        <dd>{formatClock(readingMs)}</dd>
-      </div>
-      <div class="saved">
-        <dt>saved</dt>
-        <dd>{formatClock(savedMs(words, readingMs))}</dd>
-      </div>
-    </dl>
-    <p class="basis">Saved compared with reading it at {AVERAGE_WPM} wpm, the adult average.</p>
+    {#if savedSomething}
+      <p class="lead"><strong>{formatDuration(saved)}</strong> saved</p>
+    {:else}
+      <p class="lead"><strong>{formatDuration(readingMs)}</strong> of reading</p>
+    {/if}
+    <p class="detail">
+      {formatCount(words)} {words === 1 ? 'word' : 'words'} in {formatDuration(readingMs)}. At {AVERAGE_WPM} wpm, the
+      adult average, {words === 1 ? 'it' : 'they'} would take {formatDuration(readingMs + saved)}.
+    </p>
   </div>
 
   <div class="actions">
@@ -159,44 +156,39 @@
     line-height: 1.45;
   }
 
-  dl {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin: 0;
-  }
-
-  dl div {
+  .stats {
     display: flex;
-    flex-direction: column-reverse;
-    gap: 0.25rem;
-    padding: 0.9rem 0.75rem;
-    border-radius: 0.9rem;
-    background: var(--surface);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
   }
 
-  dt {
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-
-  dd {
+  /* One figure carries the moment; the sentence under it shows the working. */
+  .lead {
     margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .lead strong {
+    display: block;
+    color: var(--accent);
     font-family: var(--display-font);
-    font-size: 1.5rem;
+    font-size: 2.75rem;
     font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
-  .saved dd {
-    color: var(--accent);
-  }
-
-  .basis {
-    margin: 0.75rem 0 0;
-    font-size: 0.8rem;
+  .detail {
+    max-width: 22rem;
+    margin: 0.35rem 0 0;
     color: var(--muted);
-    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-wrap: pretty;
   }
 
   .actions {

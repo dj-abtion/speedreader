@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T12:55:18+00:00",
+  "generatedAt": "2026-10-27T08:19:51+00:00",
   "title": "Design System: Didread",
   "extensions": {
     "colorMeta": {
@@ -228,6 +228,38 @@
           "oklch(95.0% 0.004 73.6)"
         ]
       },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Edge (light)",
+        "canonical": "#8f887d",
+        "oklch": "oklch(63.0% 0.018 79.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 79.3)",
+          "oklch(26.4% 0.008 79.3)",
+          "oklch(37.9% 0.011 79.3)",
+          "oklch(49.3% 0.015 79.3)",
+          "oklch(60.7% 0.018 79.3)",
+          "oklch(72.1% 0.015 79.3)",
+          "oklch(83.6% 0.011 79.3)",
+          "oklch(95.0% 0.008 79.3)"
+        ]
+      },
+      "edge-dark": {
+        "role": "neutral",
+        "displayName": "Edge (dark)",
+        "canonical": "#7a7369",
+        "oklch": "oklch(55.9% 0.017 77.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 77.0)",
+          "oklch(26.4% 0.008 77.0)",
+          "oklch(37.9% 0.011 77.0)",
+          "oklch(49.3% 0.014 77.0)",
+          "oklch(60.7% 0.017 77.0)",
+          "oklch(72.1% 0.014 77.0)",
+          "oklch(83.6% 0.011 77.0)",
+          "oklch(95.0% 0.007 77.0)"
+        ]
+      },
       "track": {
         "role": "neutral",
         "displayName": "Track (light)",
@@ -272,11 +304,15 @@
       },
       "stat": {
         "displayName": "Stat",
-        "purpose": "Time saved this month on the home screen."
+        "purpose": "Time saved: this month on the home screen, and per text on the finish screen."
       },
-      "stat-small": {
-        "displayName": "Stat Small",
-        "purpose": "Finish-screen figures."
+      "action": {
+        "displayName": "Action",
+        "purpose": "The home screen's main button label."
+      },
+      "label-small": {
+        "displayName": "Label Small",
+        "purpose": "'Up next' on the finish screen."
       },
       "title": {
         "displayName": "Title",
@@ -312,7 +348,7 @@
       {
         "name": "chrome-fade",
         "value": "opacity 300ms",
-        "purpose": "Reader controls fade out while playing and back on pause."
+        "purpose": "Reader controls fade out while playing and back on pause; progress stays at 40%."
       },
       {
         "name": "context-fade",
@@ -375,12 +411,12 @@
       "css": ".ds-play{display:flex;align-items:center;justify-content:center;width:4.5rem;height:4.5rem;padding:0;border:none;border-radius:50%;background:var(--accent,#c2410c);color:var(--on-accent,#fff);cursor:pointer}.ds-play svg{width:1.75rem;height:1.75rem;fill:currentColor}.ds-play:focus-visible{outline:2px solid var(--accent,#c2410c);outline-offset:3px}"
     },
     {
-      "name": "Speed Pill",
+      "name": "Speed Readout",
       "kind": "chip",
       "refersTo": "pill",
-      "description": "WPM readout between − and + steps; tabular numbers.",
-      "html": "<div class=\"ds-speed\"><button class=\"ds-step\" aria-label=\"Slower\">−</button><span class=\"ds-pill\">300 wpm</span><button class=\"ds-step\" aria-label=\"Faster\">+</button></div>",
-      "css": ".ds-speed{display:flex;align-items:center;gap:.25rem;font-family:'Figtree Variable',system-ui,sans-serif;color:var(--text,#1c1a17)}.ds-step{width:2.75rem;height:2.75rem;padding:0;border:none;border-radius:50%;background:transparent;color:inherit;font:600 1.35rem inherit;cursor:pointer}.ds-step:focus-visible{outline:2px solid var(--accent,#c2410c)}.ds-pill{min-width:6.5rem;padding:.5rem .9rem;border-radius:999px;background:var(--surface,#fff);text-align:center;font-weight:600;font-variant-numeric:tabular-nums}"
+      "description": "Plain WPM readout between − and + line-icon steps; tabular numbers.",
+      "html": "<div class=\"ds-speed\"><button class=\"ds-step\" aria-label=\"Slower\">−</button><span class=\"ds-wpm\">300 <span>wpm</span></span><button class=\"ds-step\" aria-label=\"Faster\">+</button></div>",
+      "css": ".ds-speed{display:flex;align-items:center;gap:.25rem;font-family:'Figtree Variable',system-ui,sans-serif;color:var(--text,#1c1a17)}.ds-step{width:2.75rem;height:2.75rem;padding:0;border:none;border-radius:50%;background:transparent;color:inherit;font:600 1.35rem inherit;cursor:pointer}.ds-step:focus-visible{outline:2px solid var(--accent,#c2410c)}.ds-wpm{min-width:5.5rem;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}.ds-wpm span{color:var(--muted,#6b655c);font-weight:400}"
     },
     {
       "name": "Library Card",
@@ -424,7 +460,7 @@
       "Warm-tinted neutrals in both themes; theme follows the system, with a light/dark override.",
       "Flat surfaces; depth comes from paper versus surface tone and hairline borders, never shadows.",
       "Soft, thumb-sized controls (2.75rem minimum), with exactly one filled amber action per screen.",
-      "Controls fade while playing (300ms) and return on pause."
+      "Controls fade while playing (300ms) and return on pause; only a faint progress line stays."
     ],
     "rules": [
       {
@@ -453,6 +489,11 @@
         "section": "layout"
       },
       {
+        "name": "The Amber Ring Rule",
+        "body": "Keyboard focus is a 2px amber outline, 2px out (`:focus-visible`). On an amber-filled action the ring turns Ink so it stays visible. The reader's stage never shows a ring; Space and the play button cover it. Text selection, the caret and scrollbars are themed from the palette too.",
+        "section": "elevation"
+      },
+      {
         "name": "The Paper-and-Card Rule",
         "body": "There are exactly two planes: Paper and Surface. If an element needs to stand out further, it gets amber (it's the action), not a shadow.",
         "section": "elevation"
@@ -462,8 +503,10 @@
       "**Do** keep the pivot column at 40% across, with guide ticks, for every word and chunk.",
       "**Do** use Reading-Lamp Amber for one main action per screen, plus the pivot, progress and finish moments.",
       "**Do** keep tap targets at least 2.75rem, and give the main action 3.25–4rem of height.",
+      "**Do** give focus the amber ring (Ink on amber fills), and theme selection, caret and scrollbars.",
+      "**Do** use Edge, not Guide, for a field that's found only by its outline.",
       "**Do** separate planes with tone (Paper and Surface) and 1px Guide hairlines.",
-      "**Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`) and bring it back on pause.",
+      "**Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`, and `inert` so Tab can't reach it) and bring it back on pause. Only the faint progress line stays.",
       "**Do** use tabular numbers for every changing figure.",
       "**Do** respect `prefers-reduced-motion`: drop the bubble and check-drawing animations.",
       "**Do** define every new colour for both themes on `:root`, and redefine it in both dark-mode blocks."

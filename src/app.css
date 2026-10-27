@@ -13,6 +13,8 @@
   --accent: #c2410c;
   --on-accent: #ffffff;
   --guide: #d9d2c7;
+  /* Boundaries a reader needs to find, like a text field's edge: 3:1 against paper and surface. */
+  --edge: #8f887d;
   --track: #ece6dc;
   --text-scale: 1;
   --word-size: calc(clamp(2.25rem, 9vw, 4.5rem) * var(--text-scale));
@@ -30,6 +32,7 @@
     --accent: #ff8a4c;
     --on-accent: #1a1208;
     --guide: #3d3934;
+    --edge: #7a7369;
     --track: #2e2b27;
   }
 }
@@ -43,6 +46,7 @@
   --accent: #ff8a4c;
   --on-accent: #1a1208;
   --guide: #3d3934;
+  --edge: #7a7369;
   --track: #2e2b27;
 }
 
@@ -69,4 +73,40 @@ button {
 button:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* Browser surfaces carry the palette too: focus, selection, caret and scrollbars. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* An amber fill would swallow an amber ring, so filled actions take an ink one. */
+.primary:focus-visible,
+.play:focus-visible {
+  outline-color: var(--text);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+textarea,
+input {
+  caret-color: var(--accent);
+}
+
+* {
+  scrollbar-color: var(--guide) transparent;
+}
+
+/* Text for screen readers only. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

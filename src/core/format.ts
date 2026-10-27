@@ -16,11 +16,6 @@ export function formatDuration(ms: number): string {
   return minutes % 60 === 0 ? `${hours} h` : `${hours} h ${minutes % 60} min`
 }
 
-export function formatClock(ms: number): string {
-  const seconds = Math.round(ms / 1000)
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
-}
-
 export function formatCount(count: number): string {
   return count.toLocaleString('en-US')
 }

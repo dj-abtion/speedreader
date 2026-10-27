@@ -7,6 +7,7 @@
   import AppearanceSettings from './AppearanceSettings.svelte'
   import InstallBanner from './InstallBanner.svelte'
   import { isFinished, type LibraryDocument } from './library'
+  import { SAMPLE } from './sample'
   import { loadWpm } from './settings'
   import { GUIDE_HASH } from './skill'
   import { buildInfo, formatVersion, REPOSITORY_URL } from './version'
@@ -221,6 +222,19 @@
         {/each}
       </ul>
     </section>
+  {:else}
+    <!-- A first visit gets a glimpse of the reader and a text to try it on. -->
+    <section class="welcome" aria-labelledby="welcome-head">
+      <div class="demo" aria-hidden="true">
+        <span class="before">re</span><span class="pivot">a</span><span class="after">ding</span>
+      </div>
+      <h2 id="welcome-head">One word at a time, right where your eyes are</h2>
+      <p>
+        Words flash at a fixed point with one letter lit, so your eyes never have to move.
+        {canReadClipboard ? 'Copy something long, then tap Read clipboard.' : 'Paste something long to start.'}
+      </p>
+      <button type="button" class="sample" onclick={() => onAdd(SAMPLE)}>Try a sample</button>
+    </section>
   {/if}
 
   <footer>
@@ -254,10 +268,13 @@
     box-sizing: border-box;
   }
 
+  /* At large text sizes the Aa button wraps under the name instead of running off screen. */
   header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
   }
 
   .brand {
@@ -266,9 +283,11 @@
     gap: 0.75rem;
   }
 
+  /* Capped by the viewport too, so enlarged text still leaves the name room on a phone. */
   .logo {
-    width: 3.25rem;
-    height: 3.25rem;
+    flex-shrink: 0;
+    width: min(3.25rem, 13vw);
+    height: min(3.25rem, 13vw);
   }
 
   .logo .tile {
@@ -400,8 +419,9 @@
     cursor: pointer;
   }
 
-  .file:focus-within {
+  .file:has(input:focus-visible) {
     outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .file input {
@@ -420,7 +440,7 @@
     font: inherit;
     padding: 0.75rem;
     border-radius: 0.9rem;
-    border: 1px solid var(--guide);
+    border: 1px solid var(--edge);
     background: var(--surface);
     color: inherit;
     resize: vertical;
@@ -567,6 +587,79 @@
     stroke-width: 2.2;
   }
 
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 0 0;
+    text-align: center;
+  }
+
+  /* The reader's own focal frame, in miniature: pivot column at 40%, with its guide ticks. */
+  .demo {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) auto minmax(0, 3fr);
+    align-items: baseline;
+    width: min(18rem, 100%);
+    padding: 0.45em 0;
+    font-family: var(--reading-font);
+    font-size: var(--word-size);
+    line-height: 1.2;
+  }
+
+  .demo::before,
+  .demo::after {
+    content: '';
+    position: absolute;
+    left: 40%;
+    width: 2px;
+    height: 0.3em;
+    background: var(--guide);
+  }
+
+  .demo::before {
+    top: 0;
+  }
+
+  .demo::after {
+    bottom: 0;
+  }
+
+  .demo .before {
+    text-align: right;
+  }
+
+  .demo .after {
+    text-align: left;
+  }
+
+  .welcome h2 {
+    max-width: 20rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .welcome p {
+    max-width: 22rem;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .sample {
+    min-height: 2.75rem;
+    margin-top: 0.25rem;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
   footer {
     display: flex;
     flex-wrap: wrap;
@@ -576,6 +669,13 @@
     margin-top: auto;
     font-size: 0.8rem;
     color: var(--muted);
+  }
+
+  /* Inline links get a taller tap area without changing the footer's height. */
+  footer a {
+    display: inline-block;
+    margin: -0.7rem 0;
+    padding: 0.7rem 0;
   }
 
   .claude {

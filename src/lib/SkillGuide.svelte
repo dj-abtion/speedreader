@@ -164,7 +164,7 @@
   }
 
   code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     font-size: 0.9em;
   }
 
@@ -213,8 +213,8 @@
   .command button {
     flex-shrink: 0;
     min-width: 4.75rem;
-    min-height: 2.5rem;
-    border-radius: 0.7rem;
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
     font-weight: 600;
   }
 
@@ -224,6 +224,8 @@
   }
 
   footer a {
+    display: inline-block;
+    padding: 0.7rem 0;
     color: var(--muted);
   }
 </style>
