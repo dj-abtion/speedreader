@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { formatCount, formatDuration, formatRemaining } from '../core/format'
   import { AVERAGE_WPM, savedMs } from '../core/stats'
   import type { LibraryDocument } from './library'
@@ -25,19 +24,29 @@
 
   let primary: HTMLButtonElement | undefined = $state()
   let saved = $derived(savedMs(words, readingMs))
+  // What the same text takes at the adult average, worked out on its own: on a slow read the
+  // saving is clamped to zero, so it can't be derived from reading time plus saving.
+  let averageMs = $derived((words / AVERAGE_WPM) * 60_000)
   // Under a second rounds to nothing, so a slower-than-average read leads with its own time.
   let savedSomething = $derived(saved >= 1000)
 
-  function nextTimeLeft(doc: LibraryDocument): string {
+  function nextStatus(doc: LibraryDocument): string {
     const wordsLeft = Math.max(doc.tokenCount - doc.position, 0)
-    return formatRemaining((wordsLeft / loadWpm()) * 60_000)
+    const left = formatRemaining((wordsLeft / loadWpm()) * 60_000)
+    if (doc.position === 0) return left
+    return `${Math.floor((doc.position / Math.max(doc.tokenCount, 1)) * 100)}% · ${left}`
   }
 
   function onKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') onLibrary()
   }
 
-  onMount(() => primary?.focus())
+  // The next text arrives after the screen opens and swaps which button is primary, so focus
+  // follows whichever one is current.
+  $effect(() => {
+    void next
+    primary?.focus()
+  })
 </script>
 
 <svelte:window onkeydown={onKeydown} />
@@ -61,7 +70,7 @@
     {/if}
     <p class="detail">
       {formatCount(words)} {words === 1 ? 'word' : 'words'} in {formatDuration(readingMs)}. At {AVERAGE_WPM} wpm, the
-      adult average, {words === 1 ? 'it' : 'they'} would take {formatDuration(readingMs + saved)}.
+      adult average, {words === 1 ? 'it' : 'they'} would take {formatDuration(averageMs)}.
     </p>
   </div>
 
@@ -70,7 +79,7 @@
       <div class="next">
         <span class="label">Next in library</span>
         <span class="next-title">{next.title}</span>
-        <span class="meta">{formatCount(next.tokenCount)} words · {nextTimeLeft(next)}</span>
+        <span class="meta">{formatCount(next.tokenCount)} words · {nextStatus(next)}</span>
       </div>
       <button class="primary" bind:this={primary} onclick={() => next && onReadNext(next)}>Read next</button>
     {/if}
@@ -242,5 +251,26 @@
     background: var(--accent);
     color: var(--on-accent);
     font-weight: 700;
+  }
+
+  /* On a shorter phone the moment compresses so the next action stays on screen. */
+  @media (max-height: 760px) {
+    .finish {
+      gap: 1.25rem;
+      padding-top: 1.5rem;
+    }
+
+    .done {
+      gap: 0.75rem;
+    }
+
+    .check {
+      width: 6rem;
+      height: 6rem;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+    }
   }
 </style>

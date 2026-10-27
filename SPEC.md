@@ -81,7 +81,7 @@ Pure TypeScript, no UI dependencies (reusable by a future browser extension).
 | --- | --- |
 | Play / pause | Tap anywhere, `Space` |
 | Back / forward one sentence | `←` / `→`, « / » buttons |
-| Speed −/+ 25 WPM (works while playing) | `↓` / `↑`, − / + buttons |
+| Speed −/+ 25 WPM (works while playing) | `↓` / `↑`, − / + buttons, swipe down / up on the stage (touch, one step per 40px) |
 | Seek | Drag the thin progress line along the bottom edge |
 | Words per flash (1–3) | `1` / `2` / `3`, "N words" button |
 | Theme, font, size | "Aa" button |

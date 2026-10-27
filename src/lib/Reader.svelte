@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, untrack } from 'svelte'
+  import { onDestroy, onMount, tick, untrack } from 'svelte'
   import { chunkText } from '../core/chunk'
   import { formatRemaining } from '../core/format'
   import { sentenceEnd, sentenceStart } from '../core/navigation'
@@ -58,7 +58,9 @@
   let announcement = $state('')
   let settingsButton = $state<HTMLButtonElement>()
   let bubbleTimer: ReturnType<typeof setTimeout> | undefined
-  let percent = $derived(finished ? 100 : Math.floor((index / Math.max(tokens.length, 1)) * 100))
+  let percent = $derived(
+    finished || index >= tokens.length - 1 ? 100 : Math.floor((index / Math.max(tokens.length, 1)) * 100),
+  )
 
   let lastSavedAt = 0
   let playedMs = 0
@@ -154,10 +156,18 @@
     sync()
   }
 
-  function back() {
+  let playButton = $state<HTMLButtonElement>()
+
+  async function back() {
+    const leavingCode = !!code
     player.back()
     finished = false
     sync()
+    // "Back a sentence" unmounts with the code panel, so focus moves on to play.
+    if (leavingCode) {
+      await tick()
+      playButton?.focus()
+    }
   }
 
   function forward() {
@@ -165,13 +175,11 @@
     sync()
   }
 
-  // The controls are hidden while playing, so a change made from the keyboard is confirmed in a
-  // brief bubble instead.
+  // Every change is announced; while playing the controls are hidden, so it's also confirmed in a
+  // brief bubble under the word.
   function confirmChange(text: string) {
-    if (!playing) {
-      announcement = text
-      return
-    }
+    announcement = text
+    if (!playing) return
     bubble = text
     clearTimeout(bubbleTimer)
     bubbleTimer = setTimeout(() => (bubble = ''), 900)
@@ -189,6 +197,52 @@
     saveChunkSize(player.chunkSize)
     sync()
     confirmChange(`${chunkSize} ${chunkSize === 1 ? 'word' : 'words'}`)
+  }
+
+  // On a touch screen, a vertical swipe on the stage changes speed without pausing: one step per
+  // SWIPE_STEP_PX, up for faster. The tap that would end a swipe doesn't count as play or pause.
+  const SWIPE_STEP_PX = 40
+  let swipe: { id: number; x: number; y: number; steps: number } | null = null
+  let swiped = false
+
+  function onStagePointerDown(event: PointerEvent) {
+    // With the settings sheet open the speed controls are hidden, so a swipe would change it unseen.
+    if (event.pointerType === 'mouse' || showAppearance) return
+    swipe = { id: event.pointerId, x: event.clientX, y: event.clientY, steps: 0 }
+    swiped = false
+    try {
+      ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+    } catch {
+      // Capture only keeps a swipe that leaves the stage; the swipe works without it.
+    }
+  }
+
+  function onStagePointerMove(event: PointerEvent) {
+    if (!swipe || event.pointerId !== swipe.id) return
+    const up = swipe.y - event.clientY
+    if (Math.abs(up) < Math.abs(event.clientX - swipe.x)) return
+    const steps = Math.trunc(up / SWIPE_STEP_PX)
+    if (steps === swipe.steps) return
+    changeWpm((steps - swipe.steps) * WPM_STEP)
+    swipe.steps = steps
+    swiped = true
+  }
+
+  function onStagePointerEnd(event: PointerEvent) {
+    if (swipe?.id === event.pointerId) swipe = null
+  }
+
+  function onStageClick() {
+    if (swiped) {
+      swiped = false
+      return
+    }
+    // A tap beside the open sheet just closes it, rather than starting to read.
+    if (showAppearance) {
+      showAppearance = false
+      return
+    }
+    toggle()
   }
 
   function cycleChunkSize() {
@@ -211,7 +265,16 @@
     settingsButton?.focus()
   }
 
+  // Whether focus last moved by keyboard (Tab) or by pointer. Chrome marks an element
+  // :focus-visible as soon as a key is pressed on it, so that can't tell the two apart here.
+  let keyboardModality = false
+
+  function onPointerDownCapture() {
+    keyboardModality = false
+  }
+
   function onKeydown(event: KeyboardEvent) {
+    if (event.key === 'Tab') keyboardModality = true
     if (event.metaKey || event.ctrlKey) return
     // Esc works from anywhere, including the settings' radio buttons: panel first, then the reader.
     if (event.key === 'Escape') {
@@ -220,10 +283,18 @@
       else exit()
       return
     }
-    if (event.target instanceof HTMLInputElement) return
-    // A focused button keeps its own Space; the stage is the one that means play.
+    // A control reached from the keyboard keeps its own keys (Space on a button, arrows on the
+    // slider and radios). After a click there's no visible focus, so the keys mean the reader.
     const target = event.target
-    if (event.key === ' ' && target instanceof HTMLButtonElement && !target.classList.contains('stage')) return
+    const keyboardFocused = keyboardModality && target !== document.body
+    if (keyboardFocused && target instanceof HTMLInputElement) return
+    if (keyboardFocused && event.key === ' ' && target instanceof HTMLButtonElement) return
+    // A button still presses itself when Space is released, so a mouse-focused one lets go first.
+    if (!keyboardFocused && (target instanceof HTMLButtonElement || target instanceof HTMLInputElement)) {
+      target.blur()
+    }
+    // Speed and chunk size don't apply at a code stop, where their controls are hidden.
+    if (code && /^(ArrowUp|ArrowDown|[123])$/.test(event.key)) return
     const actions: Record<string, () => void> = {
       ' ': toggle,
       ArrowLeft: back,
@@ -259,13 +330,13 @@
   })
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} onpointerdowncapture={onPointerDownCapture} />
 
 <div
   class="reader"
   class:playing
   class:paused-for-code={!!code}
-  class:settings-open={showAppearance && !code}
+  class:settings-open={showAppearance}
 >
   <!-- Hidden chrome is inert while playing, so Tab can't land on controls nobody can see. -->
   <header class="top" inert={playing}>
@@ -287,7 +358,8 @@
       (finished ? 'Done' : playing ? 'Reading' : code ? 'Paused for a code block' : started ? 'Paused' : '')}
   </p>
 
-  {#if showAppearance && code}
+  <!-- A sheet over the controls, so changes preview on the word itself without moving it. -->
+  {#if showAppearance}
     <div class="settings" inert={playing}>
       <AppearanceSettings {appearance} onChange={onAppearanceChange} />
     </div>
@@ -312,12 +384,22 @@
       <!-- Space and the play button cover the keyboard, so the stage stays out of the tab order. -->
       <button
         class="stage"
-        onclick={toggle}
+        onclick={onStageClick}
+        onpointerdown={onStagePointerDown}
+        onpointermove={onStagePointerMove}
+        onpointerup={onStagePointerEnd}
+        onpointercancel={onStagePointerEnd}
         tabindex="-1"
         aria-label={playing ? 'Pause' : 'Play'}
         aria-describedby={playing ? undefined : 'reader-context'}
       >
-        <WordDisplay {word} {appearance} />
+        <!-- The bubble hangs off the word's own frame, on the pivot column; it's announced above. -->
+        <span class="word">
+          <WordDisplay {word} {appearance} />
+          {#if bubble}
+            <span class="bubble" aria-hidden="true">{bubble}</span>
+          {/if}
+        </span>
         <p class="context" id="reader-context" aria-hidden={playing}>
           {#each context as token, i (contextOffset + i)}
             {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
@@ -327,7 +409,10 @@
           {/each}
         </p>
         <span class="hint" aria-hidden="true">
-          <span class="touch">Tap anywhere to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
+          <span class="touch">
+            Tap anywhere to {finished ? 'read again' : resuming ? 'resume' : 'start'}<br />Swipe up or down
+            for speed
+          </span>
           <span class="keys">
             <span><kbd>Space</kbd> to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
             <span><kbd>←</kbd><kbd>→</kbd> sentence</span>
@@ -337,26 +422,16 @@
         </span>
       </button>
 
-      {#if bubble}
-        <div class="bubble" role="status">{bubble}</div>
-      {/if}
-
-      <!-- A sheet over the controls, so changes preview on the word itself without moving it. -->
-      {#if showAppearance}
-        <div class="settings floating" inert={playing}>
-          <AppearanceSettings {appearance} onChange={onAppearanceChange} />
-        </div>
-      {/if}
     </div>
   {/if}
 
-  <div class="controls" inert={playing || (showAppearance && !code)}>
+  <div class="controls" inert={playing || showAppearance}>
     {#if !code}
       <div class="transport">
         <button class="round large" onclick={back} aria-label="Previous sentence" title="Previous sentence (←)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></svg>
         </button>
-        <button class="play" onclick={toggle} aria-label={playing ? 'Pause' : finished ? 'Restart' : 'Play'}>
+        <button class="play" onclick={toggle} bind:this={playButton} aria-label={playing ? 'Pause' : finished ? 'Restart' : 'Play'}>
           {#if playing}
             <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
           {:else}
@@ -418,7 +493,7 @@
     value={index}
     oninput={seek}
     aria-label="Position"
-    inert={playing || (showAppearance && !code)}
+    inert={playing || showAppearance}
     aria-valuetext={`${percent}%`}
     style:--filled={`${percent}%`}
   />
@@ -457,15 +532,11 @@
     white-space: nowrap;
   }
 
+  /* A sheet over the playback controls: opening it never moves or covers the word, so size and
+     font changes preview on the word itself. */
   .settings {
     display: flex;
     justify-content: center;
-    padding: 1rem 1rem 0;
-  }
-
-  /* A sheet over the playback controls: opening it never moves or covers the word, so size and
-     font changes preview on the word itself. */
-  .settings.floating {
     position: fixed;
     bottom: calc(1rem + env(safe-area-inset-bottom));
     left: 50%;
@@ -534,6 +605,15 @@
     font: inherit;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    /* The stage owns one-finger swipes (speed), so the page doesn't scroll or pull to refresh;
+       pinch-zoom stays with the browser. */
+    touch-action: pinch-zoom;
+  }
+
+  /* A reading column, so the pivot's 40% sits near the controls' axis on a wide screen. */
+  .word {
+    position: relative;
+    width: min(100%, 40rem);
   }
 
   .stage:focus-visible {
@@ -546,6 +626,7 @@
     margin: 1rem 0 0;
     color: var(--muted);
     font-family: var(--reading-font);
+    font-size: calc(1rem * var(--text-scale));
     line-height: 1.5;
     transition: opacity 150ms;
   }
@@ -699,9 +780,10 @@
   /* The confirmation shows just under the word, where the eyes already are. */
   .bubble {
     position: absolute;
-    top: 50%;
+    top: 100%;
     left: 40%;
-    transform: translate(-50%, 2.5rem);
+    transform: translate(-50%, 0.25rem);
+    white-space: nowrap;
     padding: 0.5rem 1rem;
     border: 1px solid var(--guide);
     border-radius: 999px;
