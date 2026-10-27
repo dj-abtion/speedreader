@@ -33,6 +33,16 @@ Give the user a link that opens a reply in Didread (https://dj-abtion.github.io/
 
    Don't add anything before or after it, repeat the reply, or summarise it. The user wants to save reading time. The one exception: if a standing instruction requires a closing line, such as an organization's sign-off, put that on its own line after the link, and nothing else.
 
+## Web pages
+
+This skill turns Claude's own replies into links. When the user wants to speed-read a web page, don't fetch the page and pipe it in: Didread opens web links itself and picks out the article. Say so in one line, for example:
+
+```markdown
+Copy the page's link and tap Read clipboard in [Didread](https://dj-abtion.github.io/speedreader/), or share the page to Didread on Android. It opens the article without the menus and ads.
+```
+
+Only fall back to `--stdin` with the page's text when the user asks for that, or the page can't be opened (paywalls, pages built entirely by JavaScript).
+
 ## When the script can't read the transcript
 
 This happens outside Claude Code (e.g. a chat in the Claude app), or when the script says it couldn't find the transcript. Use `--stdin` and pass it the reply's text exactly as you wrote it, Markdown included:
