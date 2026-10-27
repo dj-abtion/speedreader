@@ -26,8 +26,9 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          # The address of the deployed worker/ (didread-fetch). Unset, links stay unsupported.
-          VITE_LINK_FETCHER_URL: ${{ vars.LINK_FETCHER_URL }}
+          # The address of the deployed worker/ (didread-fetch). The LINK_FETCHER_URL repo variable
+          # overrides it, e.g. for a fork with its own Worker.
+          VITE_LINK_FETCHER_URL: ${{ vars.LINK_FETCHER_URL || 'https://didread-fetch.dj-3e1.workers.dev/' }}
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
