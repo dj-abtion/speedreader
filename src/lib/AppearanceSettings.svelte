@@ -110,9 +110,16 @@
     color: var(--on-accent);
   }
 
+  /* The ring lifts above its neighbours, and turns ink on the amber selected segment. */
   label:has(input:focus-visible) {
+    position: relative;
+    z-index: 1;
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+  }
+
+  label:has(input:checked:focus-visible) {
+    outline-color: var(--text);
   }
 
   label.serif {

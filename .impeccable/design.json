@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-27T08:10:32+00:00",
+  "generatedAt": "2026-10-27T08:19:51+00:00",
   "title": "Design System: Didread",
   "extensions": {
     "colorMeta": {
@@ -506,7 +506,7 @@
       "**Do** give focus the amber ring (Ink on amber fills), and theme selection, caret and scrollbars.",
       "**Do** use Edge, not Guide, for a field that's found only by its outline.",
       "**Do** separate planes with tone (Paper and Surface) and 1px Guide hairlines.",
-      "**Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`) and bring it back on pause. Only the faint progress line stays.",
+      "**Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`, and `inert` so Tab can't reach it) and bring it back on pause. Only the faint progress line stays.",
       "**Do** use tabular numbers for every changing figure.",
       "**Do** respect `prefers-reduced-motion`: drop the bubble and check-drawing animations.",
       "**Do** define every new colour for both themes on `:root`, and redefine it in both dark-mode blocks."

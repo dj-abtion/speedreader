@@ -283,7 +283,10 @@ A Surface card with a Guide hairline and 1.25rem radius. Muted copy with the key
 A 4px line with a 2.75rem invisible hit area for dragging, which lifts it clear of the phone's home-indicator edge. It is amber up to the current position and Guide after it, with a 14px amber circle as the thumb. While playing it stays as a faint line (40% opacity, no thumb, not interactive), so progress is never fully out of sight.
 
 ### Code Stop (signature)
-When playback reaches a code block it stops and says so: an uppercase Label header, "Paused for code" on the left and the language name with the line count on the right ("TypeScript · 3 lines"). The code sits in a Surface panel (0.9rem radius, monospace 0.9rem) that is only as tall as its code, up to 60% of the screen, and wraps on phones rather than scrolling sideways. **Continue reading** is the one amber action and takes focus; the transport hides until reading resumes.
+When playback reaches a code block it stops and says so: an uppercase Label header, "Paused for code" on the left and the language name with the line count on the right ("TypeScript · 3 lines"). The code sits in a Surface panel (0.9rem radius, monospace 0.9rem) that is only as tall as its code, up to 60% of the screen, and wraps on phones rather than scrolling sideways. **Continue reading** is the one amber action and takes focus, with a quiet Muted **Back a sentence** under it. The transport and the speed controls hide until reading resumes.
+
+### Settings Sheet
+In the reader, Aa opens a sheet over the playback controls rather than above the word: Surface fill, Guide hairline, 1rem radius, pinned 1rem above the bottom edge. The controls and progress line fade out under it. The word never moves or hides, so theme, font and size changes preview on the word itself. Playing closes the sheet, and Esc closes it from anywhere (focus returns to Aa) before Esc leaves the reader. On the home screen the same segmented controls sit in the page flow.
 
 ### First-visit Welcome
 An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and a **Try a sample** pill that opens a short built-in text.
@@ -303,7 +306,7 @@ Under the title, one figure carries the moment: the time saved as an amber Stat,
 - **Do** give focus the amber ring (Ink on amber fills), and theme selection, caret and scrollbars.
 - **Do** use Edge, not Guide, for a field that's found only by its outline.
 - **Do** separate planes with tone (Paper and Surface) and 1px Guide hairlines.
-- **Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`) and bring it back on pause. Only the faint progress line stays.
+- **Do** fade chrome while playing (`opacity` 300ms, `pointer-events: none`, and `inert` so Tab can't reach it) and bring it back on pause. Only the faint progress line stays.
 - **Do** use tabular numbers for every changing figure.
 - **Do** respect `prefers-reduced-motion`: drop the bubble and check-drawing animations.
 - **Do** define every new colour for both themes on `:root`, and redefine it in both dark-mode blocks.

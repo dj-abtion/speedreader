@@ -54,6 +54,9 @@
   let showAppearance = $state(false)
   let started = $state(false)
   let bubble = $state('')
+  // Changes made while paused are announced to screen readers, since no bubble shows then.
+  let announcement = $state('')
+  let settingsButton = $state<HTMLButtonElement>()
   let bubbleTimer: ReturnType<typeof setTimeout> | undefined
   let percent = $derived(finished ? 100 : Math.floor((index / Math.max(tokens.length, 1)) * 100))
 
@@ -139,6 +142,7 @@
       finished = false
     }
     player.toggle()
+    announcement = ''
     started ||= player.playing
     // The settings panel would sit over the word, and its toggle is hidden while playing.
     if (player.playing) showAppearance = false
@@ -164,7 +168,10 @@
   // The controls are hidden while playing, so a change made from the keyboard is confirmed in a
   // brief bubble instead.
   function confirmChange(text: string) {
-    if (!playing) return
+    if (!playing) {
+      announcement = text
+      return
+    }
     bubble = text
     clearTimeout(bubbleTimer)
     bubbleTimer = setTimeout(() => (bubble = ''), 900)
@@ -199,8 +206,24 @@
     onExit()
   }
 
+  function closeSettings() {
+    showAppearance = false
+    settingsButton?.focus()
+  }
+
   function onKeydown(event: KeyboardEvent) {
-    if (event.target instanceof HTMLInputElement || event.metaKey || event.ctrlKey) return
+    if (event.metaKey || event.ctrlKey) return
+    // Esc works from anywhere, including the settings' radio buttons: panel first, then the reader.
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      if (showAppearance) closeSettings()
+      else exit()
+      return
+    }
+    if (event.target instanceof HTMLInputElement) return
+    // A focused button keeps its own Space; the stage is the one that means play.
+    const target = event.target
+    if (event.key === ' ' && target instanceof HTMLButtonElement && !target.classList.contains('stage')) return
     const actions: Record<string, () => void> = {
       ' ': toggle,
       ArrowLeft: back,
@@ -210,7 +233,6 @@
       '1': () => setChunkSize(1),
       '2': () => setChunkSize(2),
       '3': () => setChunkSize(3),
-      Escape: () => (showAppearance ? (showAppearance = false) : exit()),
     }
     const action = actions[event.key]
     if (!action) return
@@ -239,25 +261,34 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="reader" class:playing class:paused-for-code={!!code}>
-  <header class="top">
-    <button class="round" onclick={exit} aria-label="Back to library">
+<div
+  class="reader"
+  class:playing
+  class:paused-for-code={!!code}
+  class:settings-open={showAppearance && !code}
+>
+  <!-- Hidden chrome is inert while playing, so Tab can't land on controls nobody can see. -->
+  <header class="top" inert={playing}>
+    <button class="round" onclick={exit} aria-label="Back to library" title="Back to library (Esc)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
     </button>
     <h1 class="title">{title}</h1>
     <button
       class="round"
       onclick={() => (showAppearance = !showAppearance)}
+      bind:this={settingsButton}
       aria-label="Display settings"
+      title="Display settings"
       aria-expanded={showAppearance}>Aa</button
     >
   </header>
   <p class="visually-hidden" role="status">
-    {finished ? 'Done' : playing ? 'Reading' : code ? 'Paused for a code block' : started ? 'Paused' : ''}
+    {announcement ||
+      (finished ? 'Done' : playing ? 'Reading' : code ? 'Paused for a code block' : started ? 'Paused' : '')}
   </p>
 
-  {#if showAppearance}
-    <div class="appearance">
+  {#if showAppearance && code}
+    <div class="settings" inert={playing}>
       <AppearanceSettings {appearance} onChange={onAppearanceChange} />
     </div>
   {/if}
@@ -274,13 +305,20 @@
       <button class="continue primary" onclick={toggle} bind:this={continueButton}>
         Continue reading
       </button>
+      <button class="back-sentence" onclick={back}>Back a sentence</button>
     </section>
   {:else}
     <div class="stage-wrap">
       <!-- Space and the play button cover the keyboard, so the stage stays out of the tab order. -->
-      <button class="stage" onclick={toggle} tabindex="-1" aria-label={playing ? 'Pause' : 'Play'}>
+      <button
+        class="stage"
+        onclick={toggle}
+        tabindex="-1"
+        aria-label={playing ? 'Pause' : 'Play'}
+        aria-describedby={playing ? undefined : 'reader-context'}
+      >
         <WordDisplay {word} {appearance} />
-        <p class="context" aria-hidden={playing}>
+        <p class="context" id="reader-context" aria-hidden={playing}>
           {#each context as token, i (contextOffset + i)}
             {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
             <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
@@ -294,6 +332,7 @@
             <span><kbd>Space</kbd> to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
             <span><kbd>←</kbd><kbd>→</kbd> sentence</span>
             <span><kbd>↑</kbd><kbd>↓</kbd> speed</span>
+            <span><kbd>1</kbd>–<kbd>3</kbd> words</span>
           </span>
         </span>
       </button>
@@ -301,13 +340,20 @@
       {#if bubble}
         <div class="bubble" role="status">{bubble}</div>
       {/if}
+
+      <!-- A sheet over the controls, so changes preview on the word itself without moving it. -->
+      {#if showAppearance}
+        <div class="settings floating" inert={playing}>
+          <AppearanceSettings {appearance} onChange={onAppearanceChange} />
+        </div>
+      {/if}
     </div>
   {/if}
 
-  <div class="controls">
+  <div class="controls" inert={playing || (showAppearance && !code)}>
     {#if !code}
       <div class="transport">
-        <button class="round large" onclick={back} aria-label="Previous sentence">
+        <button class="round large" onclick={back} aria-label="Previous sentence" title="Previous sentence (←)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></svg>
         </button>
         <button class="play" onclick={toggle} aria-label={playing ? 'Pause' : finished ? 'Restart' : 'Play'}>
@@ -317,38 +363,46 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M8 5.5v13l10.5-6.5z" /></svg>
           {/if}
         </button>
-        <button class="round large" onclick={forward} aria-label="Next sentence">
+        <button class="round large" onclick={forward} aria-label="Next sentence" title="Next sentence (→)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17l5-5-5-5M6 17l5-5-5-5" /></svg>
         </button>
       </div>
     {/if}
 
-    <div class="tuning">
-      <div class="speed">
+    <!-- Speed and chunk size don't apply to code, so they wait until reading resumes. -->
+    {#if !code}
+      <div class="tuning">
+        <div class="speed">
+          <button
+            class="step"
+            onclick={() => changeWpm(-WPM_STEP)}
+            disabled={wpm <= MIN_WPM}
+            aria-label="Slower"
+            title={wpm <= MIN_WPM ? `${MIN_WPM} wpm is the slowest` : undefined}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
+          </button>
+          <span class="wpm">{wpm} <span class="unit">wpm</span></span>
+          <button
+            class="step"
+            onclick={() => changeWpm(WPM_STEP)}
+            disabled={wpm >= MAX_WPM}
+            aria-label="Faster"
+            title={wpm >= MAX_WPM ? `${MAX_WPM} wpm is the fastest` : undefined}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" /></svg>
+          </button>
+        </div>
         <button
-          class="step"
-          onclick={() => changeWpm(-WPM_STEP)}
-          disabled={wpm <= MIN_WPM}
-          aria-label="Slower"
-          title={wpm <= MIN_WPM ? `${MIN_WPM} wpm is the slowest` : undefined}
+          class="chunk-size"
+          onclick={cycleChunkSize}
+          aria-label={`Words per flash: ${chunkSize}`}
+          title="Words per flash (1, 2 or 3)"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
-        </button>
-        <span class="wpm">{wpm} <span class="unit">wpm</span></span>
-        <button
-          class="step"
-          onclick={() => changeWpm(WPM_STEP)}
-          disabled={wpm >= MAX_WPM}
-          aria-label="Faster"
-          title={wpm >= MAX_WPM ? `${MAX_WPM} wpm is the fastest` : undefined}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" /></svg>
+          {chunkSize} {chunkSize === 1 ? 'word' : 'words'}
         </button>
       </div>
-      <button class="chunk-size" onclick={cycleChunkSize} aria-label="Words per flash">
-        {chunkSize} {chunkSize === 1 ? 'word' : 'words'}
-      </button>
-    </div>
+    {/if}
 
     <div class="status">
       <span>{percent}%</span>
@@ -364,6 +418,7 @@
     value={index}
     oninput={seek}
     aria-label="Position"
+    inert={playing || (showAppearance && !code)}
     aria-valuetext={`${percent}%`}
     style:--filled={`${percent}%`}
   />
@@ -384,11 +439,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1rem 0;
-  }
-
-  .top {
     gap: 1rem;
+    padding: 1rem 1rem 0;
   }
 
   /* The text's title sits quietly between the two corner buttons. */
@@ -405,10 +457,26 @@
     white-space: nowrap;
   }
 
-  .appearance {
+  .settings {
     display: flex;
     justify-content: center;
     padding: 1rem 1rem 0;
+  }
+
+  /* A sheet over the playback controls: opening it never moves or covers the word, so size and
+     font changes preview on the word itself. */
+  .settings.floating {
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    left: 50%;
+    z-index: 1;
+    width: min(28rem, calc(100% - 2rem));
+    padding: 1rem;
+    border: 1px solid var(--guide);
+    border-radius: 1rem;
+    background: var(--surface);
+    box-sizing: border-box;
+    transform: translateX(-50%);
   }
 
   .round {
@@ -536,6 +604,15 @@
     }
   }
 
+  .back-sentence {
+    align-self: center;
+    min-height: 2.75rem;
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
   .continue {
     min-height: 3.25rem;
     border: none;
@@ -563,7 +640,10 @@
     }
 
     .keys {
-      display: inline;
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem 1.25rem;
     }
   }
 
@@ -583,11 +663,6 @@
     white-space: nowrap;
   }
 
-  .keys > span + span::before {
-    content: '·';
-    margin: 0 0.5em;
-  }
-
   .playing .context,
   .playing .hint {
     opacity: 0;
@@ -595,15 +670,22 @@
 
   /* Controls fade while reading and come back on pause; tapping the stage pauses. */
   .top,
-  .appearance,
+  .settings,
   .controls,
   .progress {
     transition: opacity 300ms;
   }
 
   .playing .top,
-  .playing .appearance,
+  .playing .settings,
   .playing .controls {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The settings sheet takes the controls' place while it's open. */
+  .settings-open .controls,
+  .settings-open .progress {
     opacity: 0;
     pointer-events: none;
   }
@@ -621,6 +703,7 @@
     left: 40%;
     transform: translate(-50%, 2.5rem);
     padding: 0.5rem 1rem;
+    border: 1px solid var(--guide);
     border-radius: 999px;
     background: var(--surface);
     font-weight: 600;
@@ -745,7 +828,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* A thin line along the bottom edge, with a taller invisible hit area for dragging. */
   /* A 4px line with a thumb-sized hit area, lifted clear of the home-indicator edge. */
   .progress {
     --line: 4px;
@@ -777,19 +859,19 @@
     appearance: none;
   }
 
-  .playing .progress::-webkit-slider-thumb {
-    opacity: 0;
-  }
-
-  .playing .progress::-moz-range-thumb {
-    opacity: 0;
-  }
-
   .progress::-moz-range-thumb {
     width: 14px;
     height: 14px;
     border: none;
     border-radius: 50%;
     background: var(--accent);
+  }
+
+  .playing .progress::-webkit-slider-thumb {
+    opacity: 0;
+  }
+
+  .playing .progress::-moz-range-thumb {
+    opacity: 0;
   }
 </style>
