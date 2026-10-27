@@ -34,7 +34,8 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 ## Home and finishing
 
 - "Read clipboard" is the main action; "Paste text" and "Open file" sit below it.
-- Library cards show the title (two lines), a progress bar, the word count and "N% · M min left", or "Not started". A finished text shows a **Did read** stamp with its word count and reading time; opening it starts a new read-through from the beginning.
+- Library cards show the title (two lines), a progress bar, the word count and "N% · M min left", or "Not started". A finished text shows a **Did read** stamp with its word count and reading time; opening it starts a new read-through from the beginning. Unfinished texts are listed before finished ones.
+- Deleting a text (× on its card) is immediate, with no confirmation: a bar along the bottom says which text went and offers **Undo** for 8 seconds, which puts it back exactly as it was (position, reading time and place in the library). Keyboard focus moves to Undo.
 - Finishing a text opens a finish screen: the check draws itself in, with the word count, reading time and time saved, and the next unfinished text in the library. Android phones give a short vibration.
 - Time saved is the time an average adult would take at 238 wpm (Brysbaert, 2019) minus the reading time, never below zero. The home screen shows this month's total once it reaches a minute.
 - A "Use with Claude →" link in the footer, beside the version, opens a guide to installing the `/speedread` skill: a download button for the release zip with the upload steps, and the two CLI commands with copy buttons. The guide has its own address, `#claude`, so it can be sent to people; its back button and the browser's both return to the library.
