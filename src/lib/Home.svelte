@@ -26,6 +26,8 @@
     onRemove,
     deleted = null,
     onUndoDelete = () => {},
+    focusId = null,
+    onShowSample = () => {},
     onShowGuide,
   }: {
     documents: LibraryDocument[]
@@ -40,6 +42,8 @@
     onRemove: (doc: LibraryDocument) => void
     deleted?: LibraryDocument | null
     onUndoDelete?: () => void
+    focusId?: string | null
+    onShowSample?: (doc: NewDocument) => void
     onShowGuide: () => void
   } = $props()
 
@@ -108,12 +112,47 @@
     }
   }
 
-  // Reopens the sample if it's still in the library, rather than adding a copy each time.
+  // Reopens the sample if it's still in the library; otherwise it's read without being added back,
+  // since a help link shouldn't change the library.
   function showSample() {
     const saved = documents.find((doc) => doc.text === SAMPLE.text)
     if (saved) onOpen(saved)
-    else onAdd(SAMPLE)
+    else onShowSample(SAMPLE)
   }
+
+  // The install offer waits until Didread has delivered something: a first finished text.
+  let hasFinished = $derived(documents.some((doc) => doc.finishedAt !== undefined))
+  let settingsButton = $state<HTMLButtonElement>()
+
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Escape' || !showAppearance) return
+    showAppearance = false
+    settingsButton?.focus()
+  }
+
+  // Focus that fell to the page (its element went away) is put back where the reader was.
+  function focusLost(): boolean {
+    return !document.activeElement || document.activeElement === document.body
+  }
+
+  // Back from the reader, the finish screen or an Undo: focus returns to that text's card.
+  $effect(() => {
+    void documents
+    if (!focusId || !focusLost()) return
+    document.querySelector<HTMLElement>(`[data-doc-id="${CSS.escape(focusId)}"]`)?.focus({ preventScroll: true })
+  })
+
+  // When the Undo bar times out with focus on it, focus moves to the first card.
+  let hadUndo = false
+  $effect(() => {
+    if (deleted) {
+      hadUndo = true
+      return
+    }
+    if (!hadUndo) return
+    hadUndo = false
+    if (focusLost()) document.querySelector<HTMLElement>('.open')?.focus({ preventScroll: true })
+  })
 
   function percent(doc: LibraryDocument): number {
     return Math.floor((doc.position / Math.max(doc.tokenCount, 1)) * 100)
@@ -147,6 +186,8 @@
   })
 </script>
 
+<svelte:window onkeydown={onKeydown} />
+
 <div class="home">
   <header>
     <div class="brand">
@@ -163,6 +204,7 @@
     </div>
     <button
       class="round"
+      bind:this={settingsButton}
       onclick={() => (showAppearance = !showAppearance)}
       aria-label="Display settings"
       aria-expanded={showAppearance}>Aa</button
@@ -186,7 +228,7 @@
   <div class="inputs">
     {#if canReadClipboard}
       <!-- On an empty library the sample is the amber first step, since nothing may be copied yet. -->
-      <button type="button" class="primary" class:quiet={documents.length === 0} onclick={readClipboard}>
+      <button type="button" class="primary" class:quiet={documents.length === 0 || showPaste} onclick={readClipboard}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="8" y="2" width="8" height="4" rx="1" />
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -216,7 +258,8 @@
           placeholder="Paste text here…"
           autofocus={canReadClipboard}
         ></textarea>
-        <button type="submit" class:primary={!canReadClipboard} disabled={!text.trim()}>Read</button>
+        <!-- With the form open, its Read is the amber action and Read clipboard steps back. -->
+        <button type="submit" class="primary" disabled={!text.trim()}>Read</button>
       </form>
     {/if}
     {#if inputError}<p class="error" role="alert">{inputError}</p>{/if}
@@ -226,9 +269,7 @@
     <p class="notice">Saving isn't available in this browser, so texts and positions won't be kept.</p>
   {/if}
 
-  <!-- Offered once there's something in the library, so it never greets a first visit. -->
   {#if documents.length > 0}
-    <InstallBanner />
     <section>
       <div class="section-head">
         <h2>Library</h2>
@@ -238,7 +279,7 @@
         {#each ordered as doc (doc.id)}
           {@const done = isDone(doc)}
           <li class:done>
-            <button class="open" onclick={() => onOpen(doc)}>
+            <button class="open" data-doc-id={doc.id} onclick={() => onOpen(doc)}>
               <span class="title">{doc.title}</span>
               {#if done}
                 <span class="meta">
@@ -271,6 +312,8 @@
         {/each}
       </ul>
     </section>
+    <!-- Offered after a first finished text, so it never asks before Didread has proved itself. -->
+    {#if hasFinished}<InstallBanner />{/if}
   {:else}
     <!-- A first visit gets a glimpse of the reader and a text to try it on. -->
     <section class="welcome" aria-labelledby="welcome-head">
@@ -376,7 +419,7 @@
 
   h1 {
     font-family: var(--display-font);
-    font-size: 1.9rem;
+    font-size: min(1.9rem, 9vw);
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1;
@@ -569,7 +612,8 @@
     flex-direction: column;
     gap: 0.75rem;
     width: 100%;
-    padding: 1rem 3.25rem 1rem 1rem;
+    /* Room for the delete button, capped so enlarged text still leaves the title its width. */
+    padding: 1rem min(3.25rem, 14vw) 1rem 1rem;
     border: 1px solid transparent;
     border-radius: 1rem;
     background: var(--surface);
@@ -648,8 +692,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: min(2.75rem, 12vw);
+    height: min(2.75rem, 12vw);
     padding: 0;
     border: none;
     border-radius: 50%;

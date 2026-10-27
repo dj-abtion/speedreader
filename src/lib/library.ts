@@ -21,9 +21,10 @@ export function isFinished(doc: LibraryDocument): boolean {
   return doc.tokenCount > 0 && doc.position >= doc.tokenCount - 1
 }
 
-// Read before and not being read again: at the end, or reopened without getting past the start.
+// Read before and not being read again: finished (a skip to the end doesn't count), and either
+// still at the end or reopened without getting past the start.
 export function isDone(doc: LibraryDocument): boolean {
-  return isFinished(doc) || (doc.finishedAt !== undefined && doc.position === 0)
+  return doc.finishedAt !== undefined && (isFinished(doc) || doc.position === 0)
 }
 
 interface LibrarySchema extends DBSchema {

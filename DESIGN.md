@@ -274,10 +274,10 @@ The speed is a plain readout, not a control: tabular "300" in weight 600 with a 
 - **File picker:** styled as an Action button, with the native input hidden. Focus shows a 2px amber outline.
 
 ### Segmented Control
-Used for theme, font and size in the "Aa" panel. Joined Surface segments with Guide hairlines and 0.5rem outer corners. The selected segment fills with amber and its text takes the Surface colour. The radio inputs stay for keyboard and screen readers, and focus shows a 2px amber outline offset by 2px.
+Used for theme, font and size in the "Aa" panel. Joined Surface segments with Guide hairlines and 0.5rem outer corners. The selected segment fills with Ink and its text takes the Paper colour, so amber stays for the focal point and the main action. The radio inputs stay for keyboard and screen readers, and focus shows a 2px amber outline offset by 2px.
 
 ### Install Banner
-A Surface card with a Guide hairline and 1.25rem radius. Muted copy with the key phrase in Ink, a compact amber Install button (2.75rem tall) and a round × dismiss.
+A Surface card with a Guide hairline and 1.25rem radius. Muted copy with the key phrase in Ink, a compact amber Install button (2.75rem tall) and a round × dismiss. It sits below the library and only appears after a first finished text, so it never asks before Didread has proved itself.
 
 ### Reader Progress Line
 A 4px line with a 2.75rem invisible hit area for dragging, which lifts it clear of the phone's home-indicator edge. It is amber up to the current position and Guide after it, with a 14px amber circle as the thumb. While playing it stays as a faint line (40% opacity, no thumb, not interactive), so progress is never fully out of sight.

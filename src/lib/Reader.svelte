@@ -287,14 +287,17 @@
     // slider and radios). After a click there's no visible focus, so the keys mean the reader.
     const target = event.target
     const keyboardFocused = keyboardModality && target !== document.body
-    if (keyboardFocused && target instanceof HTMLInputElement) return
+    // Radios keep all their keys; the slider keeps its arrows, but Space still plays from it.
+    if (keyboardFocused && target instanceof HTMLInputElement && (target.type === 'radio' || event.key !== ' ')) {
+      return
+    }
     if (keyboardFocused && event.key === ' ' && target instanceof HTMLButtonElement) return
     // A button still presses itself when Space is released, so a mouse-focused one lets go first.
     if (!keyboardFocused && (target instanceof HTMLButtonElement || target instanceof HTMLInputElement)) {
       target.blur()
     }
-    // Speed and chunk size don't apply at a code stop, where their controls are hidden.
-    if (code && /^(ArrowUp|ArrowDown|[123])$/.test(event.key)) return
+    // Speed and chunk size wait while their controls are hidden: at a code stop or under the sheet.
+    if ((code || showAppearance) && /^(ArrowUp|ArrowDown|[123])$/.test(event.key)) return
     const actions: Record<string, () => void> = {
       ' ': toggle,
       ArrowLeft: back,
@@ -661,6 +664,18 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  /* Each half stays whole; on a narrow phone the two stack rather than break mid-phrase. */
+  .code-head span {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 22rem) {
+    .code-head {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
   }
 
   /* Long code scrolls inside the panel so the controls stay put. */

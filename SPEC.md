@@ -6,7 +6,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 
 - Installable, offline-capable **PWA**. Static files only — no backend, no accounts.
 - Hosted on **GitHub Pages**, deployed by GitHub Actions.
-- Once the library has a text, the home screen offers installing in a banner above the library: "Put Didread on your home screen. Works offline, one tap away", adding "and you can share text straight to it" on Android.
+- Once a first text has been read to the end, the home screen offers installing in a banner below the library: "Put Didread on your home screen. Works offline, one tap away", adding "and you can share text straight to it" on Android.
   - Where the browser offers an install prompt (`beforeinstallprompt`, Chromium), **Install** opens it. The event is caught at startup, as it can arrive while the reader is open.
   - On iPhone and iPad, which have no prompt to call, the banner gives the steps instead: tap Share, then Add to Home Screen.
   - Elsewhere, and in the installed app, there's no banner. × hides it for good on that device (`localStorage`).
@@ -38,6 +38,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 - Deleting a text (× on its card) is immediate, with no confirmation: a bar along the bottom says which text went and offers **Undo** for 8 seconds, which puts it back exactly as it was (position, reading time and place in the library). Keyboard focus moves to Undo.
 - Finishing a text opens a finish screen: the check draws itself in, with the word count, reading time and time saved, and the next unfinished text in the library. Android phones give a short vibration.
 - Time saved is the time an average adult would take at 238 wpm (Brysbaert, 2019) minus the reading time, never below zero. The home screen shows this month's total once it reaches a minute.
+- A text reached faster than 1.2× the top speed (1000 wpm) was skipped through, not read: it gets no finish screen, no stamp and no time saved, and the library says "Skipped to the end, so it isn't counted as read."
 - A "Use with Claude →" link in the footer, beside the version, opens a guide to installing the `/speedread` skill: a download button for the release zip with the upload steps, and the two CLI commands with copy buttons. The guide has its own address, `#claude`, so it can be sent to people; its back button and the browser's both return to the library.
 - No sync between devices.
 
