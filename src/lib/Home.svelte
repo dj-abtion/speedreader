@@ -254,10 +254,13 @@
     box-sizing: border-box;
   }
 
+  /* At large text sizes the Aa button wraps under the name instead of running off screen. */
   header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
   }
 
   .brand {
@@ -400,8 +403,9 @@
     cursor: pointer;
   }
 
-  .file:focus-within {
+  .file:has(input:focus-visible) {
     outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .file input {
@@ -420,7 +424,7 @@
     font: inherit;
     padding: 0.75rem;
     border-radius: 0.9rem;
-    border: 1px solid var(--guide);
+    border: 1px solid var(--edge);
     background: var(--surface);
     color: inherit;
     resize: vertical;

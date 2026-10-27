@@ -190,6 +190,7 @@
   {#if reading}
     {#key reading.id}
       <Reader
+        title={reading.title}
         tokens={reading.tokens}
         startIndex={reading.position}
         {appearance}

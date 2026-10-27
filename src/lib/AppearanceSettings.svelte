@@ -80,7 +80,13 @@
 
   /* Each group is a segmented control: the radios stay for keyboard and screen readers. */
   label {
-    padding: 0.4rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    box-sizing: border-box;
     border: 1px solid var(--guide);
     background: var(--surface);
     cursor: pointer;
@@ -101,7 +107,7 @@
   label:has(input:checked) {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--surface);
+    color: var(--on-accent);
   }
 
   label:has(input:focus-visible) {

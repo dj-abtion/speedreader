@@ -12,6 +12,7 @@
   import WordDisplay from './WordDisplay.svelte'
 
   let {
+    title = '',
     tokens,
     startIndex = 0,
     appearance,
@@ -20,6 +21,7 @@
     onFinish = () => {},
     onExit,
   }: {
+    title?: string
     tokens: Token[]
     startIndex?: number
     appearance: Appearance
@@ -31,6 +33,14 @@
   } = $props()
 
   const WPM_STEP = 25
+  const LANGUAGES: Record<string, string> = {
+    js: 'JavaScript', javascript: 'JavaScript', ts: 'TypeScript', typescript: 'TypeScript',
+    jsx: 'JSX', tsx: 'TSX', py: 'Python', python: 'Python', rb: 'Ruby', ruby: 'Ruby',
+    sh: 'Shell', bash: 'Shell', zsh: 'Shell', shell: 'Shell', console: 'Shell', json: 'JSON',
+    yml: 'YAML', yaml: 'YAML', html: 'HTML', css: 'CSS', sql: 'SQL', go: 'Go', rs: 'Rust',
+    rust: 'Rust', java: 'Java', kt: 'Kotlin', swift: 'Swift', c: 'C', cpp: 'C++', cs: 'C#',
+    php: 'PHP', md: 'Markdown', markdown: 'Markdown', svelte: 'Svelte', diff: 'Diff',
+  }
   const SAVE_INTERVAL_MS = 3000
 
   let index = $state(0)
@@ -82,6 +92,16 @@
   let word = $derived(chunkText(tokens, chunk))
   let code = $derived(tokens[chunk.start]?.code)
   let codeLines = $derived(code ? code.source.split('\n').length : 0)
+  let codeLanguage = $derived(
+    code?.language ? (LANGUAGES[code.language.toLowerCase()] ?? code.language) : '',
+  )
+  let continueButton = $state<HTMLButtonElement>()
+  // Playback stops by itself at a code block, so focus moves to the way on.
+  $effect(() => {
+    if (code && !playing) continueButton?.focus({ preventScroll: true })
+  })
+  // Before the first play there's nothing to resume, unless the text was already part read.
+  let resuming = $derived(started || index > 0)
   let context = $derived(
     tokens.slice(sentenceStart(tokens, index), sentenceEnd(tokens, index) + 1),
   )
@@ -120,6 +140,8 @@
     }
     player.toggle()
     started ||= player.playing
+    // The settings panel would sit over the word, and its toggle is hidden while playing.
+    if (player.playing) showAppearance = false
     sync()
   }
 
@@ -188,7 +210,7 @@
       '1': () => setChunkSize(1),
       '2': () => setChunkSize(2),
       '3': () => setChunkSize(3),
-      Escape: exit,
+      Escape: () => (showAppearance ? (showAppearance = false) : exit()),
     }
     const action = actions[event.key]
     if (!action) return
@@ -217,12 +239,12 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="reader" class:playing>
+<div class="reader" class:playing class:paused-for-code={!!code}>
   <header class="top">
     <button class="round" onclick={exit} aria-label="Back to library">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
     </button>
-    <span class="state">{finished ? 'Done' : started ? 'Paused' : ''}</span>
+    <h1 class="title">{title}</h1>
     <button
       class="round"
       onclick={() => (showAppearance = !showAppearance)}
@@ -230,6 +252,9 @@
       aria-expanded={showAppearance}>Aa</button
     >
   </header>
+  <p class="visually-hidden" role="status">
+    {finished ? 'Done' : playing ? 'Reading' : code ? 'Paused for a code block' : started ? 'Paused' : ''}
+  </p>
 
   {#if showAppearance}
     <div class="appearance">
@@ -238,57 +263,87 @@
   {/if}
 
   {#if code}
-    <section class="code" aria-label="Code block">
-      <div class="code-head">
-        <span>{code.language || 'Code'}</span>
-        <span>{codeLines} {codeLines === 1 ? 'line' : 'lines'}</span>
-      </div>
-      <pre><code>{code.source}</code></pre>
-      <button class="continue" onclick={toggle}>Continue reading</button>
+    <section class="code" aria-labelledby="code-head">
+      <h2 class="code-head" id="code-head">
+        <span>Paused for code</span>
+        <span>{codeLanguage ? `${codeLanguage} · ` : ''}{codeLines} {codeLines === 1 ? 'line' : 'lines'}</span>
+      </h2>
+      <!-- Long code scrolls, so the panel takes focus for keyboard scrolling. -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+      <pre tabindex="0" role="region" aria-label="Code"><code>{code.source}</code></pre>
+      <button class="continue primary" onclick={toggle} bind:this={continueButton}>
+        Continue reading
+      </button>
     </section>
   {:else}
-    <button class="stage" onclick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
-      <WordDisplay {word} {appearance} />
-      <p class="context" aria-hidden={playing}>
-        {#each context as token, i (contextOffset + i)}
-          {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
-          <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
-          <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
-          <span class:current>{token.text}</span>{' '}
-        {/each}
-      </p>
-      <span class="hint" aria-hidden="true">
-        {finished ? 'Tap anywhere to read again' : started ? 'Tap anywhere to resume' : 'Tap anywhere to start'}
-      </span>
-    </button>
-  {/if}
+    <div class="stage-wrap">
+      <!-- Space and the play button cover the keyboard, so the stage stays out of the tab order. -->
+      <button class="stage" onclick={toggle} tabindex="-1" aria-label={playing ? 'Pause' : 'Play'}>
+        <WordDisplay {word} {appearance} />
+        <p class="context" aria-hidden={playing}>
+          {#each context as token, i (contextOffset + i)}
+            {@const current = contextOffset + i >= chunk.start && contextOffset + i < chunk.end}
+            <!-- Svelte trims whitespace at the end of a block, so the separator must be explicit. -->
+            <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
+            <span class:current>{token.text}</span>{' '}
+          {/each}
+        </p>
+        <span class="hint" aria-hidden="true">
+          <span class="touch">Tap anywhere to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
+          <span class="keys">
+            <span><kbd>Space</kbd> to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
+            <span><kbd>←</kbd><kbd>→</kbd> sentence</span>
+            <span><kbd>↑</kbd><kbd>↓</kbd> speed</span>
+          </span>
+        </span>
+      </button>
 
-  {#if bubble}
-    <div class="bubble" role="status">{bubble}</div>
+      {#if bubble}
+        <div class="bubble" role="status">{bubble}</div>
+      {/if}
+    </div>
   {/if}
 
   <div class="controls">
-    <div class="transport">
-      <button class="round large" onclick={back} aria-label="Previous sentence">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></svg>
-      </button>
-      <button class="play" onclick={toggle} aria-label={playing ? 'Pause' : finished ? 'Restart' : 'Play'}>
-        {#if playing}
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
-        {:else}
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M8 5.5v13l10.5-6.5z" /></svg>
-        {/if}
-      </button>
-      <button class="round large" onclick={forward} aria-label="Next sentence">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17l5-5-5-5M6 17l5-5-5-5" /></svg>
-      </button>
-    </div>
+    {#if !code}
+      <div class="transport">
+        <button class="round large" onclick={back} aria-label="Previous sentence">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></svg>
+        </button>
+        <button class="play" onclick={toggle} aria-label={playing ? 'Pause' : finished ? 'Restart' : 'Play'}>
+          {#if playing}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+          {:else}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M8 5.5v13l10.5-6.5z" /></svg>
+          {/if}
+        </button>
+        <button class="round large" onclick={forward} aria-label="Next sentence">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17l5-5-5-5M6 17l5-5-5-5" /></svg>
+        </button>
+      </div>
+    {/if}
 
     <div class="tuning">
       <div class="speed">
-        <button class="step" onclick={() => changeWpm(-WPM_STEP)} disabled={wpm <= MIN_WPM} aria-label="Slower">−</button>
-        <span class="wpm">{wpm} wpm</span>
-        <button class="step" onclick={() => changeWpm(WPM_STEP)} disabled={wpm >= MAX_WPM} aria-label="Faster">+</button>
+        <button
+          class="step"
+          onclick={() => changeWpm(-WPM_STEP)}
+          disabled={wpm <= MIN_WPM}
+          aria-label="Slower"
+          title={wpm <= MIN_WPM ? `${MIN_WPM} wpm is the slowest` : undefined}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
+        </button>
+        <span class="wpm">{wpm} <span class="unit">wpm</span></span>
+        <button
+          class="step"
+          onclick={() => changeWpm(WPM_STEP)}
+          disabled={wpm >= MAX_WPM}
+          aria-label="Faster"
+          title={wpm >= MAX_WPM ? `${MAX_WPM} wpm is the fastest` : undefined}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" /></svg>
+        </button>
       </div>
       <button class="chunk-size" onclick={cycleChunkSize} aria-label="Words per flash">
         {chunkSize} {chunkSize === 1 ? 'word' : 'words'}
@@ -309,6 +364,7 @@
     value={index}
     oninput={seek}
     aria-label="Position"
+    aria-valuetext={`${percent}%`}
     style:--filled={`${percent}%`}
   />
 </div>
@@ -331,9 +387,22 @@
     padding: 1rem 1rem 0;
   }
 
-  .state {
-    font-size: 0.85rem;
+  .top {
+    gap: 1rem;
+  }
+
+  /* The text's title sits quietly between the two corner buttons. */
+  .title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
     color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .appearance {
@@ -354,10 +423,12 @@
     font-weight: 600;
   }
 
+  /* The sentence skips stay quiet so the play button is the one obvious action. */
   .round.large {
     width: 3.25rem;
     height: 3.25rem;
-    background: var(--surface);
+    border-color: transparent;
+    color: var(--muted);
   }
 
   svg {
@@ -373,6 +444,12 @@
   svg .fill {
     fill: currentColor;
     stroke: none;
+  }
+
+  .stage-wrap {
+    position: relative;
+    flex: 1;
+    display: flex;
   }
 
   .stage {
@@ -391,6 +468,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  .stage:focus-visible {
+    outline: none;
+  }
+
   .context {
     max-width: 40rem;
     min-height: 4.5em;
@@ -407,10 +488,12 @@
     text-decoration-color: var(--accent);
   }
 
+  /* The panel takes only the room its code needs, centred where the word was. */
   .code {
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.75rem;
     width: min(44rem, 100%);
     min-height: 0;
@@ -422,6 +505,8 @@
   .code-head {
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -431,8 +516,9 @@
 
   /* Long code scrolls inside the panel so the controls stay put. */
   pre {
-    flex: 1 1 0;
-    min-height: 8rem;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: 60dvh;
     margin: 0;
     padding: 1rem;
     overflow: auto;
@@ -442,10 +528,21 @@
     tab-size: 2;
   }
 
+  /* On a phone, wrapping beats a sideways scroll that's easy to miss. */
+  @media (max-width: 40rem) {
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+
   .continue {
-    min-height: 3rem;
+    min-height: 3.25rem;
+    border: none;
     border-radius: 0.9rem;
-    font-weight: 600;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
   }
 
   .hint {
@@ -455,6 +552,42 @@
     transition: opacity 150ms;
   }
 
+  /* With a mouse and keyboard, the hint teaches the keys instead of the tap. */
+  .keys {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .touch {
+      display: none;
+    }
+
+    .keys {
+      display: inline;
+    }
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.2em;
+    margin: 0 0.1em;
+    padding: 0.05em 0.35em;
+    border: 1px solid var(--guide);
+    border-radius: 0.3rem;
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .keys > span {
+    white-space: nowrap;
+  }
+
+  .keys > span + span::before {
+    content: '·';
+    margin: 0 0.5em;
+  }
+
   .playing .context,
   .playing .hint {
     opacity: 0;
@@ -462,23 +595,31 @@
 
   /* Controls fade while reading and come back on pause; tapping the stage pauses. */
   .top,
+  .appearance,
   .controls,
   .progress {
     transition: opacity 300ms;
   }
 
   .playing .top,
-  .playing .controls,
-  .playing .progress {
+  .playing .appearance,
+  .playing .controls {
     opacity: 0;
     pointer-events: none;
   }
 
+  /* While reading, progress stays as a faint line along the bottom edge. */
+  .playing .progress {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* The confirmation shows just under the word, where the eyes already are. */
   .bubble {
     position: absolute;
-    left: 50%;
-    bottom: calc(6rem + env(safe-area-inset-bottom));
-    transform: translateX(-50%);
+    top: 50%;
+    left: 40%;
+    transform: translate(-50%, 2.5rem);
     padding: 0.5rem 1rem;
     border-radius: 999px;
     background: var(--surface);
@@ -524,6 +665,10 @@
     gap: 1.75rem;
   }
 
+  .paused-for-code .controls {
+    padding-top: 0.5rem;
+  }
+
   .play {
     display: flex;
     align-items: center;
@@ -544,9 +689,10 @@
 
   .tuning {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem 0.75rem;
   }
 
   .speed {
@@ -556,21 +702,34 @@
   }
 
   .step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
     padding: 0;
     border: none;
     border-radius: 50%;
     background: transparent;
-    font-size: 1.35rem;
-    font-weight: 600;
   }
 
-  .wpm,
+  /* The speed is a readout, not a button: plain text between its two steps. */
+  .wpm {
+    min-width: 5.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .unit {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
   .chunk-size {
     min-width: 6.5rem;
+    min-height: 2.75rem;
     padding: 0.5rem 0.9rem;
-    border: none;
     border-radius: 999px;
     background: var(--surface);
     text-align: center;
@@ -587,10 +746,12 @@
   }
 
   /* A thin line along the bottom edge, with a taller invisible hit area for dragging. */
+  /* A 4px line with a thumb-sized hit area, lifted clear of the home-indicator edge. */
   .progress {
     --line: 4px;
+    display: block;
     width: 100%;
-    height: 1.5rem;
+    height: 2.75rem;
     margin: 0 0 env(safe-area-inset-bottom);
     background: transparent;
     appearance: none;
@@ -614,6 +775,14 @@
     border-radius: 50%;
     background: var(--accent);
     appearance: none;
+  }
+
+  .playing .progress::-webkit-slider-thumb {
+    opacity: 0;
+  }
+
+  .playing .progress::-moz-range-thumb {
+    opacity: 0;
   }
 
   .progress::-moz-range-thumb {

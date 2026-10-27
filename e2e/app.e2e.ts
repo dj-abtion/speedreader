@@ -209,11 +209,12 @@ test('confirms a speed change made while playing', async ({ page }) => {
   await pasteAndRead(page, story)
   await page.keyboard.press('Space')
   await page.keyboard.press('ArrowUp')
-  await expect(page.getByRole('status')).toHaveText('325 wpm')
+  await expect(page.locator('.bubble')).toHaveText('325 wpm')
 
   await page.keyboard.press('Space')
   await expect(page.locator('.wpm')).toHaveText('325 wpm')
-  await expect(page.getByText('Tap anywhere to resume')).toBeVisible()
+  // The test browser has a mouse, so the hint teaches the keys.
+  await expect(page.locator('.hint')).toContainText('Space to resume')
 })
 
 test('stops on a code block and shows the code until reading continues', async ({ page }) => {
@@ -221,9 +222,10 @@ test('stops on a code block and shows the code until reading continues', async (
   await pasteAndRead(page, 'Run this:\n\n```sh\nnpm run build\nnpm test\n```\n\nAfter the code.')
   await page.keyboard.press('Space')
 
-  const code = page.getByRole('region', { name: 'Code block' })
+  const code = page.getByRole('region', { name: /^Paused for code/ })
   await expect(code).toContainText('npm run build\nnpm test', { timeout: 10_000 })
-  await expect(code).toContainText('sh')
+  await expect(code).toContainText('Shell · 2 lines')
+  await expect(page.getByRole('button', { name: 'Continue reading' })).toBeFocused()
   await expect(page.locator('.frame')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Continue reading' }).click()
