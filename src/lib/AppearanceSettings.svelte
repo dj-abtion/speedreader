@@ -66,6 +66,7 @@
 
   fieldset {
     display: flex;
+    flex-wrap: wrap;
     margin: 0;
     padding: 0;
     border: none;

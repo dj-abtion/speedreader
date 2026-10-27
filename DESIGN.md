@@ -211,7 +211,7 @@ A warm, near-monochrome paper palette with a single amber light source.
 - **Title** (Figtree 600, 1rem, line-height 1.35): library card titles, clamped to two lines, and button labels.
 - **Body** (Figtree 400, 1rem, line-height 1.45): paragraphs and descriptions.
 - **Meta** (Figtree 400, 0.85rem, tabular, Muted): progress, "N min left", word counts.
-- **Label** (Figtree 700, 0.8rem, 0.08em, uppercase, Muted): section heads such as the library heading and the code panel header. **Label Small** (0.75rem) is used for "Up next" on the finish screen.
+- **Label** (Figtree 700, 0.8rem, 0.08em, uppercase, Muted): section heads such as the library heading and the code panel header. **Label Small** (0.75rem) is used for "Next in library" on the finish screen.
 - **Reading Word** (system or serif, `clamp(2.25rem, 9vw, 4.5rem)` scaled by S/M/L/XL, line-height 1.2): one word per flash. **Reading Phrase** (`clamp(1.5rem, 6vw, 3.5rem)`) is used for two- and three-word chunks.
 
 ### Named Rules
@@ -223,7 +223,7 @@ A warm, near-monochrome paper palette with a single amber light source.
 
 Single column, centred, phone-first. The home screen is at most 36rem wide, and the finish screen and reader controls at most 28rem. The code panel widens to 44rem and the paused context sentence to 40rem. Pages fill the viewport (`100dvh`), use a 1.25rem side gutter, and respect safe-area insets at the top and bottom.
 
-Spacing is relaxed but not airy. Most stacks use 0.6–0.75rem gaps, sections use 1.5rem, and the finish screen uses 2rem. The footer sits at the bottom with `margin-top: auto`.
+Spacing is relaxed but not airy. Most stacks use 0.6–0.75rem gaps, sections use 1.5rem, and the finish screen uses 2rem. The footer sits at the bottom with `margin-top: auto`; its links are Ink and Muted, never amber, so the main action keeps the only light.
 
 The reader is a full-viewport stage. The top bar holds close, the text's title (small, Muted, one line) and Aa. The word centres in the middle, and controls plus the progress line sit at the bottom. Tapping anywhere on the stage plays or pauses. While paused the screen is about reading first: the faint context sentence under the word, a hint (taps on touch screens, keys with a mouse), the amber play button as the only filled control, and quiet sentence skips beside it. Below 360px the settings row wraps.
 
@@ -240,7 +240,7 @@ The system is flat. There are no box-shadows anywhere. Depth comes from tone alo
 
 ## Shapes
 
-Soft, generous corners that scale with the element. Default buttons and segmented controls are 0.5rem. Action buttons, text fields and the code panel are 0.9rem. Library cards and the "Up next" card are 1rem, and the install banner is 1.25rem. Icon buttons, the play button and the progress thumb are full circles, and the words-per-flash control is a full pill. Progress bars are thin (0.375rem) with a 0.2rem radius.
+Soft, generous corners that scale with the element. Default buttons and segmented controls are 0.5rem. Action buttons, text fields and the code panel are 0.9rem. Library cards and the "Next in library" card are 1rem, and the install banner is 1.25rem. Icon buttons, the play button and the progress thumb are full circles, and the words-per-flash control is a full pill. Progress bars are thin (0.375rem) with a 0.2rem radius.
 
 Icons are line-drawn: currentColor strokes at 2.2 (3 for the small stamp check), round caps and joins, no fills except the play triangle.
 
@@ -286,10 +286,10 @@ A 4px line with a 2.75rem invisible hit area for dragging, which lifts it clear 
 When playback reaches a code block it stops and says so: an uppercase Label header, "Paused for code" on the left and the language name with the line count on the right ("TypeScript · 3 lines"). The code sits in a Surface panel (0.9rem radius, monospace 0.9rem) that is only as tall as its code, up to 60% of the screen, and wraps on phones rather than scrolling sideways. **Continue reading** is the one amber action and takes focus, with a quiet Muted **Back a sentence** under it. The transport and the speed controls hide until reading resumes.
 
 ### Settings Sheet
-In the reader, Aa opens a sheet over the playback controls rather than above the word: Surface fill, Guide hairline, 1rem radius, pinned 1rem above the bottom edge. The controls and progress line fade out under it. The word never moves or hides, so theme, font and size changes preview on the word itself. Playing closes the sheet, and Esc closes it from anywhere (focus returns to Aa) before Esc leaves the reader. On the home screen the same segmented controls sit in the page flow.
+In the reader, Aa opens a sheet over the playback controls rather than above the word: Surface fill, Guide hairline, 1rem radius, pinned 1rem above the bottom edge. The controls and progress line fade out under it. The word never moves or hides, so theme, font and size changes preview on the word itself. Tapping beside it only closes it (it doesn't start reading), swipes are ignored while it's open, playing closes it, and Esc closes it from anywhere (focus returns to Aa) before Esc leaves the reader. The same sheet serves the code stop. On the home screen the same segmented controls sit in the page flow.
 
 ### First-visit Welcome
-An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and a **Try a sample** pill that opens a short built-in text.
+An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and **Try a sample**, the screen's one amber action, which opens a short built-in text. While the library is empty, Read clipboard steps back to a Surface button, since a first visitor may have nothing copied.
 
 ### Finish Check (signature)
 A 9rem mark: two Muted guide ticks, as in the reader, with an amber check between them that draws itself in (600ms, 150ms delay, `cubic-bezier(0.3, 0, 0.2, 1)`). It doesn't animate when reduced motion is requested.

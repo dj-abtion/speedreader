@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte'
   import { readableText, textFromFile, type NewDocument } from '../core/document'
   import { formatCount, formatDuration, formatRemaining } from '../core/format'
   import { payloadFromLink } from '../core/link'
@@ -46,13 +47,28 @@
   let showPaste = $state(!canReadClipboard)
   let showAppearance = $state(false)
   let inProgress = $derived(documents.filter((doc) => doc.position > 0 && !isFinished(doc)).length)
+  // Unfinished texts lead, so the one to continue is never below a text that's already done.
+  let ordered = $derived([...documents].sort((a, b) => Number(isFinished(a)) - Number(isFinished(b))))
+  let textarea = $state<HTMLTextAreaElement>()
+
+  async function togglePaste() {
+    showPaste = !showPaste
+    if (!showPaste) return
+    await tick()
+    textarea?.focus()
+  }
 
   function submit(event: SubmitEvent) {
     event.preventDefault()
     if (!text.trim()) return
+    inputError = ''
     const payload = payloadFromLink(text, appUrl)
     if (payload) onOpenLink(payload)
-    else onAdd({ title: '', text: readableText(text) })
+    // A bare web link isn't text to read, and the clipboard route already says so.
+    else if (parseShare(new URLSearchParams({ text })).kind === 'link') {
+      inputError = "Links can't be opened yet. Paste the text itself instead."
+      return
+    } else onAdd({ title: '', text: readableText(text) })
     text = ''
   }
 
@@ -146,7 +162,8 @@
 
   <div class="inputs">
     {#if canReadClipboard}
-      <button type="button" class="primary" onclick={readClipboard}>
+      <!-- On an empty library the sample is the amber first step, since nothing may be copied yet. -->
+      <button type="button" class="primary" class:quiet={documents.length === 0} onclick={readClipboard}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="8" y="2" width="8" height="4" rx="1" />
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -156,7 +173,7 @@
     {/if}
     <div class="secondary">
       {#if canReadClipboard}
-        <button type="button" onclick={() => (showPaste = !showPaste)} aria-expanded={showPaste}>Paste text</button>
+        <button type="button" onclick={togglePaste} aria-expanded={showPaste}>Paste text</button>
       {/if}
       <label class="file">
         Open file
@@ -170,6 +187,7 @@
         <!-- svelte-ignore a11y_autofocus -->
         <textarea
           id="text"
+          bind:this={textarea}
           bind:value={text}
           rows="6"
           placeholder="Paste text here…"
@@ -194,7 +212,7 @@
         {#if inProgress > 0}<span>{inProgress} in progress</span>{/if}
       </div>
       <ul>
-        {#each documents as doc (doc.id)}
+        {#each ordered as doc (doc.id)}
           {@const done = isFinished(doc)}
           <li class:done>
             <button class="open" onclick={() => onOpen(doc)}>
@@ -390,7 +408,18 @@
     font-weight: 700;
   }
 
+  /* Before anything is in the library, Read clipboard steps back and the sample leads. */
+  .primary.quiet {
+    min-height: 3.25rem;
+    border: 1px solid var(--guide);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
   .primary svg {
+    flex-shrink: 0;
     width: 1.4rem;
     height: 1.4rem;
     fill: none;
@@ -653,11 +682,14 @@
   }
 
   .sample {
-    min-height: 2.75rem;
-    margin-top: 0.25rem;
-    padding: 0 1.25rem;
+    min-height: 3.25rem;
+    margin-top: 0.5rem;
+    padding: 0 1.75rem;
+    border: none;
     border-radius: 999px;
-    font-weight: 600;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
   }
 
   footer {
@@ -678,10 +710,13 @@
     padding: 0.7rem 0;
   }
 
+  /* Amber is kept for the main action, so the footer link is ink with an underline. */
   .claude {
-    color: var(--accent);
+    color: var(--text);
     font-weight: 600;
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: var(--guide);
+    text-underline-offset: 0.2em;
   }
 
   .version {
@@ -690,5 +725,10 @@
 
   .version a {
     color: inherit;
+    text-decoration: none;
+  }
+
+  .version a:hover {
+    text-decoration: underline;
   }
 </style>

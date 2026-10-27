@@ -83,7 +83,8 @@ button:disabled {
 
 /* An amber fill would swallow an amber ring, so filled actions take an ink one. */
 .primary:focus-visible,
-.play:focus-visible {
+.play:focus-visible,
+.sample:focus-visible {
   outline-color: var(--text);
 }
 

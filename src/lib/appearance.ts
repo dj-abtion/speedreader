@@ -17,7 +17,7 @@ export const DEFAULT_APPEARANCE: Appearance = { theme: 'system', font: 'sans', s
 const SIZE_SCALE: Record<Size, number> = { S: 0.75, M: 1, L: 1.25, XL: 1.5 }
 
 // Must match the backgrounds in app.css so the browser chrome blends with the page.
-const THEME_COLORS = { light: '#f7f7f5', dark: '#121212' }
+const THEME_COLORS = { light: '#f6f3ee', dark: '#141311' }
 
 const APPEARANCE_KEY = 'speedreader.appearance'
 
