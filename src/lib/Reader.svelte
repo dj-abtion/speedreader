@@ -191,6 +191,42 @@
     confirmChange(`${chunkSize} ${chunkSize === 1 ? 'word' : 'words'}`)
   }
 
+  // On a touch screen, a vertical swipe on the stage changes speed without pausing: one step per
+  // SWIPE_STEP_PX, up for faster. The tap that would end a swipe doesn't count as play or pause.
+  const SWIPE_STEP_PX = 40
+  let swipe: { id: number; x: number; y: number; steps: number } | null = null
+  let swiped = false
+
+  function onStagePointerDown(event: PointerEvent) {
+    if (event.pointerType === 'mouse') return
+    swipe = { id: event.pointerId, x: event.clientX, y: event.clientY, steps: 0 }
+    swiped = false
+    ;(event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId)
+  }
+
+  function onStagePointerMove(event: PointerEvent) {
+    if (!swipe || event.pointerId !== swipe.id) return
+    const up = swipe.y - event.clientY
+    if (Math.abs(up) < Math.abs(event.clientX - swipe.x)) return
+    const steps = Math.trunc(up / SWIPE_STEP_PX)
+    if (steps === swipe.steps) return
+    changeWpm((steps - swipe.steps) * WPM_STEP)
+    swipe.steps = steps
+    swiped = true
+  }
+
+  function onStagePointerEnd(event: PointerEvent) {
+    if (swipe?.id === event.pointerId) swipe = null
+  }
+
+  function onStageClick() {
+    if (swiped) {
+      swiped = false
+      return
+    }
+    toggle()
+  }
+
   function cycleChunkSize() {
     setChunkSize((player.chunkSize % MAX_CHUNK_SIZE) + 1)
   }
@@ -312,7 +348,11 @@
       <!-- Space and the play button cover the keyboard, so the stage stays out of the tab order. -->
       <button
         class="stage"
-        onclick={toggle}
+        onclick={onStageClick}
+        onpointerdown={onStagePointerDown}
+        onpointermove={onStagePointerMove}
+        onpointerup={onStagePointerEnd}
+        onpointercancel={onStagePointerEnd}
         tabindex="-1"
         aria-label={playing ? 'Pause' : 'Play'}
         aria-describedby={playing ? undefined : 'reader-context'}
@@ -327,7 +367,10 @@
           {/each}
         </p>
         <span class="hint" aria-hidden="true">
-          <span class="touch">Tap anywhere to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
+          <span class="touch">
+            Tap anywhere to {finished ? 'read again' : resuming ? 'resume' : 'start'}<br />Swipe up or down
+            for speed
+          </span>
           <span class="keys">
             <span><kbd>Space</kbd> to {finished ? 'read again' : resuming ? 'resume' : 'start'}</span>
             <span><kbd>←</kbd><kbd>→</kbd> sentence</span>
@@ -534,6 +577,8 @@
     font: inherit;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    /* The stage owns vertical swipes (speed), so the page doesn't scroll or pull to refresh. */
+    touch-action: none;
   }
 
   .stage:focus-visible {

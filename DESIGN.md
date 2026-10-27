@@ -261,7 +261,7 @@ Soft and thumb-sized; quiet by default, with only one main action filled amber.
 A 4.5rem amber circle with a 1.75rem play or pause icon in On Amber. It sits between the « and » sentence buttons, 1.75rem apart. It is the single strongest element on the paused reader.
 
 ### Speed and Words per Flash
-The speed is a plain readout, not a control: tabular "300" in weight 600 with a Muted "wpm", between transparent − / + line-icon steps. A step that hits the limit greys out and says why in its tooltip. Words per flash is the one pill: Surface fill, Guide hairline, full pill shape, at least 6.5rem by 2.75rem. A brief Surface pill bubble confirms keyboard changes while playing, just under the word on the focal column.
+The speed is a plain readout, not a control: tabular "300" in weight 600 with a Muted "wpm", between transparent − / + line-icon steps. A step that hits the limit greys out and says why in its tooltip. Words per flash is the one pill: Surface fill, Guide hairline, full pill shape, at least 6.5rem by 2.75rem. On touch screens a vertical swipe on the stage changes speed without pausing (up is faster, one step per 40px). A brief Surface pill bubble confirms keyboard and swipe changes while playing, just under the word on the focal column.
 
 ### Library Card
 - **Corner Style:** 1rem.

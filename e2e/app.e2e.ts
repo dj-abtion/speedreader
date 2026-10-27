@@ -325,3 +325,37 @@ test.describe('on an iPhone', () => {
     await expect(banner.getByRole('button', { name: 'Install' })).toHaveCount(0)
   })
 })
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true })
+
+  test('changes speed with a vertical swipe on the stage, without playing', async ({ page }) => {
+    await page.goto('./')
+    await pasteAndRead(page, story)
+    await expect(page.locator('.wpm')).toHaveText('300 wpm')
+
+    // Two 40px steps up, then one back down: +50, then -25.
+    await page.locator('.stage').evaluate((stage) => {
+      const box = stage.getBoundingClientRect()
+      const x = box.left + box.width / 2
+      const y = box.top + box.height / 2
+      const fire = (type: string, dy: number) =>
+        stage.dispatchEvent(
+          new PointerEvent(type, { pointerId: 7, pointerType: 'touch', clientX: x, clientY: y + dy, bubbles: true }),
+        )
+      fire('pointerdown', 0)
+      fire('pointermove', -45)
+      fire('pointermove', -85)
+      fire('pointermove', -50)
+      fire('pointerup', -50)
+      stage.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    await expect(page.locator('.wpm')).toHaveText('325 wpm')
+    await expect(page.locator('.reader')).not.toHaveClass(/playing/)
+
+    // A plain tap still plays.
+    await page.locator('.stage').tap()
+    await expect(page.locator('.reader')).toHaveClass(/playing/)
+  })
+})
