@@ -46,7 +46,7 @@ Success means the reader finishes the text, understood it, and spent less time t
 ## Brand Commitments
 
 - **Name:** Didread. The tagline is "Too long? Did read." and the finish stamp reads **Did read**.
-- **Voice:** plain, short and friendly; it says what happens without hype. Examples: "Read faster, one word at a time.", "Works offline, one tap away", "4 min left".
+- **Voice:** plain, short and friendly; it says what happens without hype. Examples: "Read faster, one word at a time.", "Works offline, one tap away", "4 min left", and the first-visit welcome's "Copy something long, or a link to it, then tap Read clipboard."
 - **Assets:** app icons and favicon in `public/`.
 
 ## Evidence on Hand
