@@ -283,9 +283,11 @@
     gap: 0.75rem;
   }
 
+  /* Capped by the viewport too, so enlarged text still leaves the name room on a phone. */
   .logo {
-    width: 3.25rem;
-    height: 3.25rem;
+    flex-shrink: 0;
+    width: min(3.25rem, 13vw);
+    height: min(3.25rem, 13vw);
   }
 
   .logo .tile {
