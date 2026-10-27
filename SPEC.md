@@ -45,7 +45,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 - Finishing a text opens a finish screen: the check draws itself in, with the word count, reading time and time saved, and the next unfinished text in the library. Android phones give a short vibration.
 - Time saved is the time an average adult would take at 238 wpm (Brysbaert, 2019) minus the reading time, never below zero. The home screen shows this month's total once it reaches a minute.
 - A text reached faster than 1.2× the top speed (1000 wpm) was skipped through, not read: it gets no finish screen, no stamp and no time saved, and the library says "Skipped to the end, so it isn't counted as read."
-- A "Use with Claude →" link in the footer, beside the version, opens a guide to installing the `/speedread` skill: a download button for the release zip with the upload steps, and the two CLI commands with copy buttons. The guide has its own address, `#claude`, so it can be sent to people; its back button and the browser's both return to the library.
+- A "Use with Claude →" link in the footer, beside the version, opens a guide to installing the `/speedread` skill: a download button for the release zip with the upload steps, and the two CLI commands with copy buttons. Where links can be opened, it also says that a link Claude gives to an article can be copied and read, and that web pages go through Didread's own server, unlike reader links. The guide has its own address, `#claude`, so it can be sent to people; its back button and the browser's both return to the library.
 - No sync between devices.
 
 ## Tokenizer

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { canOpenLinks } from './pageLink'
   import { CLI_COMMANDS, SKILL_README_URL, SKILL_ZIP_URL } from './skill'
 
   let { onBack }: { onBack: () => void } = $props()
@@ -47,6 +48,12 @@
       replies with a link that opens that answer here.
     </p>
     <p class="muted">The text travels inside the link and never goes to a server.</p>
+    {#if canOpenLinks}
+      <p class="muted">
+        Did Claude link to an article? Copy that link and tap Read clipboard to read the article itself. Web pages are
+        fetched through Didread's own server, which keeps nothing.
+      </p>
+    {/if}
     <p class="muted">At Abtion? You already have it through Brewale, so there's nothing to install.</p>
   </div>
 
