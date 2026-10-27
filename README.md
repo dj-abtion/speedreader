@@ -28,7 +28,7 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 ## Opening web links
 
-Links are fetched by a small Cloudflare Worker in [`worker/`](worker/README.md), since browsers can't read most sites themselves. The app only offers links once the Worker is deployed and `LINK_FETCHER_URL` is set; the setup steps are in its README.
+Links are fetched by a small Cloudflare Worker in [`worker/`](worker/README.md), since browsers can't read most sites themselves. The deployed app uses the Worker at `didread-fetch.dj-3e1.workers.dev`; the setup steps for deploying it are in its README.
 
 ## `/speedread` skill for Claude Code
 

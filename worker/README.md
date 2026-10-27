@@ -9,8 +9,8 @@ The Cloudflare Worker that fetches web pages for Didread. Browsers won't let the
    - the secret `CLOUDFLARE_API_TOKEN`, with the token
    - the variable `CLOUDFLARE_ACCOUNT_ID`, with your Cloudflare account ID
 3. Run the **Worker** workflow (Actions → Worker → Run workflow). It deploys `didread-fetch` and prints its address, such as `https://didread-fetch.<your-subdomain>.workers.dev/`.
-4. Add the variable `LINK_FETCHER_URL` with that address, then run **Deploy**. The app is built with it and starts opening links.
+4. The app is built with that address: it's the default in `.github/workflows/deploy.yml` (currently `https://didread-fetch.dj-3e1.workers.dev/`). A deploy under another account gets another subdomain, so set the variable `LINK_FETCHER_URL` to its address, then run **Deploy**.
 
-Until `LINK_FETCHER_URL` is set, the app keeps saying links can't be opened yet.
+A build without a fetcher address (such as `npm run build` locally) keeps saying links can't be opened yet.
 
 To deploy by hand instead: `npx wrangler deploy` in this folder.
