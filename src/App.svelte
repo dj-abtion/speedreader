@@ -41,6 +41,10 @@
   let finishes = $state(loadFinishes())
   let summary = $derived(monthSummary(finishes))
   let notice = $state('')
+  // The last deleted text, kept briefly so it can be put back.
+  let deleted = $state.raw<LibraryDocument | null>(null)
+  let deletedTimer: ReturnType<typeof setTimeout> | undefined
+  const UNDO_MS = 8000
   let appearance = $state(loadAppearance())
   let showGuide = $state(location.hash === GUIDE_HASH)
 
@@ -101,6 +105,20 @@
 
   async function remove(doc: LibraryDocument) {
     await library.remove(doc.id).catch(() => {})
+    await refresh()
+    // Offered once the card is gone, so focus can move from its delete button to Undo. It's a plain
+    // copy, since the library's documents are reactive proxies that IndexedDB can't store.
+    deleted = $state.snapshot(doc)
+    clearTimeout(deletedTimer)
+    deletedTimer = setTimeout(() => (deleted = null), UNDO_MS)
+  }
+
+  async function undoDelete() {
+    if (!deleted) return
+    const doc = deleted
+    deleted = null
+    clearTimeout(deletedTimer)
+    await library.restore(doc).catch(() => {})
     await refresh()
   }
 
@@ -224,6 +242,8 @@
       onOpenLink={openLink}
       onOpen={open}
       onRemove={remove}
+      {deleted}
+      onUndoDelete={undoDelete}
       onShowGuide={openGuide}
     />
   {/if}

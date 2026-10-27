@@ -40,6 +40,16 @@ describe('library', () => {
     expect(isFinished(finished!)).toBe(true)
   })
 
+  it('restores a deleted document exactly as it was', async () => {
+    const doc = await library.add({ title: 'Tale', text: 'a b c d' })
+    await library.saveProgress(doc.id, 2, 1500)
+    const saved = (await library.get(doc.id))!
+    await library.remove(doc.id)
+    await library.restore(saved)
+    expect(await library.get(doc.id)).toEqual(saved)
+    expect(await library.list()).toEqual([saved])
+  })
+
   it('ignores position updates for deleted documents', async () => {
     const doc = await library.add({ title: 'Tale', text: 'a b c' })
     await library.remove(doc.id)

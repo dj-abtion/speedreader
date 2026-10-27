@@ -83,6 +83,12 @@ export function openLibrary(name = 'speedreader') {
     async remove(id: string): Promise<void> {
       await (await db).delete('documents', id)
     },
+
+    // Puts a deleted document back exactly as it was, so undoing a delete keeps its position,
+    // reading time and place in the library.
+    async restore(doc: LibraryDocument): Promise<void> {
+      await (await db).put('documents', doc)
+    },
   }
 
   async function update(id: string, change: (doc: LibraryDocument) => LibraryDocument) {

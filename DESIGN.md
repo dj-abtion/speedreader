@@ -288,6 +288,9 @@ When playback reaches a code block it stops and says so: an uppercase Label head
 ### Settings Sheet
 In the reader, Aa opens a sheet over the playback controls rather than above the word: Surface fill, Guide hairline, 1rem radius, pinned 1rem above the bottom edge. The controls and progress line fade out under it. The word never moves or hides, so theme, font and size changes preview on the word itself. Tapping beside it only closes it (it doesn't start reading), swipes are ignored while it's open, playing closes it, and Esc closes it from anywhere (focus returns to Aa) before Esc leaves the reader. The same sheet serves the code stop. On the home screen the same segmented controls sit in the page flow.
 
+### Undo Bar
+Deleting a text needs no confirmation. A bar appears pinned 1rem above the bottom edge (Surface fill, Guide hairline, 1rem radius, at most 32rem wide): Muted "Deleted" with the title in Ink, ellipsed to one line, and an amber **Undo** text button at 2.75rem. It's a status region, takes focus from the vanished delete button, and goes after 8 seconds.
+
 ### First-visit Welcome
 An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and **Try a sample**, the screen's one amber action, which opens a short built-in text. While the library is empty, Read clipboard steps back to a Surface button, since a first visitor may have nothing copied.
 

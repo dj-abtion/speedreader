@@ -359,3 +359,23 @@ test.describe('on a touch screen', () => {
     await expect(page.locator('.reader')).toHaveClass(/playing/)
   })
 })
+
+test('deletes a text at once and puts it back with Undo', async ({ page }) => {
+  await page.goto('./')
+  await pasteAndRead(page, story)
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Escape')
+
+  const card = page.getByRole('button', { name: /^A Long Story/ })
+  await expect(card).toContainText('%')
+  await page.getByRole('button', { name: 'Delete A Long Story' }).click()
+  await expect(card).toHaveCount(0)
+
+  const undo = page.getByRole('button', { name: 'Undo' })
+  await expect(page.getByRole('status')).toContainText('Deleted A Long Story')
+  await expect(undo).toBeFocused()
+  await undo.click()
+
+  await expect(card).toContainText('%')
+  await expect(undo).toHaveCount(0)
+})

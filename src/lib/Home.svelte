@@ -24,6 +24,8 @@
     onOpenLink,
     onOpen,
     onRemove,
+    deleted = null,
+    onUndoDelete = () => {},
     onShowGuide,
   }: {
     documents: LibraryDocument[]
@@ -36,6 +38,8 @@
     onOpenLink: (payload: string) => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
+    deleted?: LibraryDocument | null
+    onUndoDelete?: () => void
     onShowGuide: () => void
   } = $props()
 
@@ -119,9 +123,20 @@
     return doc.readingMs ? `${words} in ${formatDuration(doc.readingMs)}` : words
   }
 
+  // Deleting is instant and undoable, so there's no confirmation to get through first.
+  let undoButton = $state<HTMLButtonElement>()
+
   function remove(doc: LibraryDocument) {
-    if (confirm(`Delete "${doc.title}"?`)) onRemove(doc)
+    onRemove(doc)
   }
+
+  // The card and its delete button are gone, so focus that fell to the page moves to Undo.
+  $effect(() => {
+    if (!deleted || !undoButton) return
+    if (!document.activeElement || document.activeElement === document.body) {
+      undoButton.focus({ preventScroll: true })
+    }
+  })
 </script>
 
 <div class="home">
@@ -253,6 +268,13 @@
       </p>
       <button type="button" class="sample" onclick={() => onAdd(SAMPLE)}>Try a sample</button>
     </section>
+  {/if}
+
+  {#if deleted}
+    <div class="undo" role="status">
+      <span class="undo-text">Deleted <span class="undo-title">{deleted.title}</span></span>
+      <button type="button" bind:this={undoButton} onclick={onUndoDelete}>Undo</button>
+    </div>
   {/if}
 
   <footer>
@@ -689,6 +711,50 @@
     border-radius: 999px;
     background: var(--accent);
     color: var(--on-accent);
+    font-weight: 700;
+  }
+
+  /* A quiet bar along the bottom: what went, and the way back. */
+  .undo {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(32rem, calc(100% - 2rem));
+    padding: 0.35rem 0.35rem 0.35rem 1rem;
+    border: 1px solid var(--guide);
+    border-radius: 1rem;
+    background: var(--surface);
+    box-sizing: border-box;
+    transform: translateX(-50%);
+  }
+
+  .undo-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    gap: 0.3em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .undo-title {
+    overflow: hidden;
+    color: var(--text);
+    font-weight: 600;
+    text-overflow: ellipsis;
+  }
+
+  .undo button {
+    flex-shrink: 0;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border-color: transparent;
+    background: transparent;
+    color: var(--accent);
     font-weight: 700;
   }
 
