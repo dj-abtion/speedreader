@@ -39,6 +39,7 @@ An RSVP (Rapid Serial Visual Presentation) speed reader: words flash one at a ti
 ## Home and finishing
 
 - "Read clipboard" is the main action; "Paste text" and "Open file" sit below it.
+- An empty library shows a welcome instead: a glimpse of the reader, one line on how it works, and **Try a sample**, which opens "How Didread works". The line ends "Copy something long, or a link to it, then tap Read clipboard." ("Paste something long, or a link to it, to start." where the clipboard can't be read). A build without a link fetcher leaves out "or a link to it". The sample's last paragraph says a copied link opens the article too.
 - Library cards show the title (two lines), a progress bar, the word count and "N% · M min left", or "Not started". A finished text shows a **Did read** stamp with its word count and reading time; opening it starts a new read-through from the beginning, and the stamp stays (beside the new progress while it's being read again). Unfinished texts are listed before finished ones.
 - Deleting a text (× on its card) is immediate, with no confirmation: a bar along the bottom says which text went and offers **Undo** for 8 seconds, which puts it back exactly as it was (position, reading time and place in the library). Keyboard focus moves to Undo.
 - Finishing a text opens a finish screen: the check draws itself in, with the word count, reading time and time saved, and the next unfinished text in the library. Android phones give a short vibration.
