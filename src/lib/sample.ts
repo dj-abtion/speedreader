@@ -9,5 +9,5 @@ Tap anywhere to pause. The sentence you were in appears under the word, and resu
 
 Change the speed with minus and plus. Most people start around 300 words per minute and are comfortable at 400 after a few texts.
 
-When you're done, copy something you've been meaning to read and tap Read clipboard. Too long? Did read.`,
+When you're done, copy something you've been meaning to read and tap Read clipboard. A copied link works too: Didread opens the article on that page, without the menus and ads. Too long? Did read.`,
 }
