@@ -573,7 +573,7 @@
     margin: 0 0.1em;
     padding: 0.05em 0.35em;
     border: 1px solid var(--guide);
-    border-radius: 0.3rem;
+    border-radius: 0.2rem;
     font: inherit;
     font-size: 0.8rem;
     text-align: center;

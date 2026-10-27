@@ -224,6 +224,8 @@
   }
 
   footer a {
+    display: inline-block;
+    padding: 0.7rem 0;
     color: var(--muted);
   }
 </style>
