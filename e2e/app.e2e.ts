@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { encodeText } from '../src/core/link.ts'
+import { LINK_FETCHER_URL } from '../playwright.config.ts'
 
 const story = [
   'A Long Story',
@@ -96,9 +97,58 @@ test('still accepts shares from the older GET share target', async ({ page }) =>
   await expect(page.getByRole('button', { name: /^Shared note/ })).toBeVisible()
 })
 
-test('explains that shared links are not supported', async ({ page }) => {
+const articlePage = `<html><head><title>Reading on the Train | Example</title></head><body>
+  <nav>Home About Contact</nav>
+  <article><h1>Reading on the Train</h1>${Array.from(
+    { length: 6 },
+    (_, i) => `<p>Morning paragraph ${i} has enough words, commas, and sentences to count as an article.</p>`,
+  ).join('')}</article></body></html>`
+
+test('opens a shared link after asking once, then without asking', async ({ page }) => {
+  const fetched: string[] = []
+  await page.route(`${LINK_FETCHER_URL}**`, (route) => {
+    fetched.push(new URL(route.request().url()).searchParams.get('url') ?? '')
+    return route.fulfill({
+      body: articlePage,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' },
+    })
+  })
+  await page.goto('./?url=https%3A%2F%2Fwww.example.com%2Ftrain')
+  await expect(page.getByRole('heading', { name: 'Open example.com?' })).toBeVisible()
+  expect(fetched).toEqual([])
+
+  await page.getByRole('button', { name: 'Open page' }).click()
+  await expect(page.locator('.frame')).toHaveText('Morning')
+  expect(fetched).toEqual(['https://www.example.com/train'])
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: /^Reading on the Train/ })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Paste text' }).click()
+  await page.getByLabel('Paste the text you want to read').fill('https://example.com/again')
+  await page.getByRole('button', { name: 'Read', exact: true }).click()
+  // The same article again resumes the saved copy rather than adding another.
+  await expect(page.locator('.frame')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: /^Reading on the Train/ })).toHaveCount(1)
+})
+
+test('says why a link could not be opened', async ({ page }) => {
+  await page.route(`${LINK_FETCHER_URL}**`, (route) =>
+    route.fulfill({
+      status: 502,
+      body: JSON.stringify({ error: 'status', status: 404 }),
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    }),
+  )
+  await page.goto('./?url=https%3A%2F%2Fexample.com%2Fgone')
+  await page.getByRole('button', { name: 'Open page' }).click()
+  await expect(page.getByRole('status')).toHaveText("example.com couldn't find that page.")
+})
+
+test('leaves a shared link alone when asked not to open it', async ({ page }) => {
   await page.goto('./?url=https%3A%2F%2Fexample.com%2Farticle')
-  await expect(page.getByRole('status')).toHaveText(/Links can't be opened yet/)
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByRole('heading', { name: /^Open / })).toHaveCount(0)
 })
 
 test('shows several words per flash and remembers the setting', async ({ page }) => {

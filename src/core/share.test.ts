@@ -23,14 +23,25 @@ describe('parseShare', () => {
     })
   })
 
-  it('rejects a bare link in the url field', () => {
+  it('reads a bare link in the url field as a page to open', () => {
     expect(parseShare(params('?title=Page&url=https%3A%2F%2Fexample.com%2Fa'))).toEqual({
       kind: 'link',
+      url: 'https://example.com/a',
     })
   })
 
-  it('rejects text that is only a link, as Android often sends it', () => {
-    expect(parseShare(params('?text=https%3A%2F%2Fexample.com%2Fa'))).toEqual({ kind: 'link' })
+  it('reads text that is only a link as a page to open, as Android often sends it', () => {
+    expect(parseShare(params('?text=https%3A%2F%2Fexample.com%2Fa'))).toEqual({
+      kind: 'link',
+      url: 'https://example.com/a',
+    })
+  })
+
+  it('prefers the url field when the text is a link too', () => {
+    expect(parseShare(params('?text=https%3A%2F%2Fexample.com%2Fshort&url=https%3A%2F%2Fexample.com%2Fa'))).toEqual({
+      kind: 'link',
+      url: 'https://example.com/a',
+    })
   })
 
   it('keeps shared text that contains a link alongside real content', () => {
