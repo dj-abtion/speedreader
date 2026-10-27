@@ -104,6 +104,6 @@ function prepareBlocks(markdown: string): { text: string; code: CodeBlock[] } {
   return { text: lines.join('\n'), code }
 }
 
-function withPause(line: string): string {
+export function withPause(line: string): string {
   return ENDS_WITH_PAUSE.test(line) ? line : `${line} —`
 }

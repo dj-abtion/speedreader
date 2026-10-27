@@ -4,6 +4,7 @@
   import { formatCount, formatDuration, formatRemaining } from '../core/format'
   import { payloadFromLink } from '../core/link'
   import { parseShare } from '../core/share'
+  import { canOpenLinks, hostOf } from './pageLink'
   import type { Appearance } from './appearance'
   import AppearanceSettings from './AppearanceSettings.svelte'
   import InstallBanner from './InstallBanner.svelte'
@@ -22,6 +23,12 @@
     onAppearanceChange,
     onAdd,
     onOpenLink,
+    onOpenPage = () => {},
+    pendingPage = null,
+    onConfirmPage = () => {},
+    onCancelPage = () => {},
+    loadingHost = null,
+    onCancelLoading = () => {},
     onOpen,
     onRemove,
     deleted = null,
@@ -38,6 +45,12 @@
     onAppearanceChange: (appearance: Appearance) => void
     onAdd: (doc: NewDocument) => void
     onOpenLink: (payload: string) => void
+    onOpenPage?: (url: string) => void
+    pendingPage?: string | null
+    onConfirmPage?: () => void
+    onCancelPage?: () => void
+    loadingHost?: string | null
+    onCancelLoading?: () => void
     onOpen: (doc: LibraryDocument) => void
     onRemove: (doc: LibraryDocument) => void
     deleted?: LibraryDocument | null
@@ -71,11 +84,15 @@
     if (!text.trim()) return
     inputError = ''
     const payload = payloadFromLink(text, appUrl)
+    const share = parseShare(new URLSearchParams({ text }))
     if (payload) onOpenLink(payload)
-    // A bare web link isn't text to read, and the clipboard route already says so.
-    else if (parseShare(new URLSearchParams({ text })).kind === 'link') {
-      inputError = "Links can't be opened yet. Paste the text itself instead."
-      return
+    // A bare web link is a page to fetch, not a one-word text.
+    else if (share.kind === 'link') {
+      if (!canOpenLinks) {
+        inputError = "Links can't be opened yet. Paste the text itself instead."
+        return
+      }
+      onOpenPage(share.url)
     } else onAdd({ title: '', text: readableText(text) })
     text = ''
   }
@@ -93,7 +110,10 @@
     if (payload) return onOpenLink(payload)
     const share = parseShare(new URLSearchParams({ text: clipboard }))
     if (share.kind === 'document') onAdd(share.document)
-    else if (share.kind === 'link') inputError = "Links can't be opened yet. Copy the text itself instead."
+    else if (share.kind === 'link') {
+      if (canOpenLinks) onOpenPage(share.url)
+      else inputError = "Links can't be opened yet. Copy the text itself instead."
+    }
     else inputError = 'The clipboard is empty.'
   }
 
@@ -216,6 +236,29 @@
   {/if}
 
   {#if notice}<p class="notice" role="status">{notice}</p>{/if}
+
+  <!-- Asked once, before the first address ever leaves the device. -->
+  {#if pendingPage}
+    <section class="consent" aria-labelledby="consent-head">
+      <h2 id="consent-head">Open {hostOf(pendingPage)}?</h2>
+      <p>
+        Didread fetches web pages through its own small server. It sees the page address and keeps nothing. Your
+        library stays on this device. You'll only be asked once.
+      </p>
+      <div class="consent-actions">
+        <!-- svelte-ignore a11y_autofocus -->
+        <button type="button" class="primary" onclick={onConfirmPage} autofocus>Open page</button>
+        <button type="button" onclick={onCancelPage}>Cancel</button>
+      </div>
+    </section>
+  {/if}
+
+  {#if loadingHost}
+    <div class="loading" role="status">
+      <span>Opening {loadingHost}…</span>
+      <button type="button" onclick={onCancelLoading}>Cancel</button>
+    </div>
+  {/if}
 
   <!-- Under a minute reads as a glitch rather than an achievement, so it waits until then. -->
   {#if summary.savedMs >= 60_000}
@@ -573,6 +616,59 @@
     color: var(--muted);
   }
 
+  .consent {
+    padding: 1.1rem 1.1rem 1rem;
+    border: 1px solid var(--guide);
+    border-radius: 1rem;
+    background: var(--surface);
+  }
+
+
+  .consent p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .consent-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .consent-actions button {
+    flex: 1 1 8rem;
+    min-height: 3rem;
+    border-radius: 0.9rem;
+    font-weight: 600;
+  }
+
+  .consent-actions .primary {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--muted);
+  }
+
+  .loading span {
+    overflow-wrap: anywhere;
+  }
+
+  .loading button {
+    flex-shrink: 0;
+    color: var(--text);
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: 0.9rem;
+    font-weight: 600;
+  }
+
   section {
     display: flex;
     flex-direction: column;
@@ -751,6 +847,14 @@
 
   .demo .after {
     text-align: left;
+  }
+
+  /* Declared after the section labels, which they would otherwise inherit. */
+  .consent h2 {
+    font-size: 1.1rem;
+    letter-spacing: normal;
+    text-transform: none;
+    overflow-wrap: anywhere;
   }
 
   .welcome h2 {

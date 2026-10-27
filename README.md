@@ -26,6 +26,10 @@ CHROMIUM_EXECUTABLE=/path/to/chrome npm run test:e2e
 
 Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedreader/` via `.github/workflows/deploy.yml`. The repository's Pages source must be set to **GitHub Actions**.
 
+## Opening web links
+
+Links are fetched by a small Cloudflare Worker in [`worker/`](worker/README.md), since browsers can't read most sites themselves. The app only offers links once the Worker is deployed and `LINK_FETCHER_URL` is set; the setup steps are in its README.
+
 ## `/speedread` skill for Claude Code
 
 `plugins/speedread/` holds a Claude Code skill. It turns Claude's previous reply into a one-tap Didread link, with the text carried in the link's `#` fragment. Type `/speedread`, or `/speedread 2` for the reply before that. Claude answers with just the link, and on your own computer the script also opens it in your browser.

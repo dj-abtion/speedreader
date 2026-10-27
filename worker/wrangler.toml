@@ -1,0 +1,8 @@
+name = "didread-fetch"
+main = "fetch.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Didread promises not to keep what people read, so requests aren't logged.
+[observability]
+enabled = false

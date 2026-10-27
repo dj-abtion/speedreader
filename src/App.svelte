@@ -11,6 +11,7 @@
   import Home from './lib/Home.svelte'
   import { isDone, isFinished, openLibrary, type LibraryDocument } from './lib/library'
   import { loadFinishes, recordFinish } from './lib/readingLog'
+  import { canOpenLinks, fetchPage, hasLinkConsent, hostOf, PageError, saveLinkConsent } from './lib/pageLink'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
   import { GUIDE_HASH } from './lib/skill'
@@ -42,6 +43,11 @@
   let finishes = $state(loadFinishes())
   let summary = $derived(monthSummary(finishes))
   let notice = $state('')
+  // A web link waiting for the one-time OK to fetch it, and the site being fetched.
+  let pendingPage = $state<string | null>(null)
+  let loadingHost = $state<string | null>(null)
+  // Bumped by each fetch and by Cancel, so a page that arrives late is dropped.
+  let pageRequest = 0
   // The last deleted text, kept briefly so it can be put back.
   let deleted = $state.raw<LibraryDocument | null>(null)
   // The card to put focus back on when the library comes back, so keyboard users keep their place.
@@ -90,9 +96,50 @@
       notice = "This link couldn't be opened. It may have been cut off when it was copied."
       return
     }
-    const saved = (await library.list().catch(() => [])).find((doc) => doc.text === text)
+    await openOrAdd({ title: '', text })
+  }
+
+  async function openOrAdd(doc: NewDocument) {
+    const saved = (await library.list().catch(() => [])).find((existing) => existing.text === doc.text)
     if (saved) open(saved)
-    else await add({ title: '', text })
+    else await add(doc)
+  }
+
+  // The first link asks before anything is sent to the fetcher; later ones open straight away.
+  async function openPage(url: string) {
+    notice = ''
+    if (!canOpenLinks) {
+      notice = "Links can't be opened yet. Share the text itself instead."
+      return
+    }
+    if (!hasLinkConsent()) {
+      pendingPage = url
+      return
+    }
+    pendingPage = null
+    loadingHost = hostOf(url)
+    const request = ++pageRequest
+    // Reading something else in the meantime also drops the page.
+    const current = () => request === pageRequest && !reading
+    try {
+      const doc = await fetchPage(url)
+      if (current()) await openOrAdd(doc)
+    } catch (error) {
+      if (current()) notice = error instanceof PageError ? error.message : `Couldn't open ${loadingHost}.`
+    } finally {
+      if (request === pageRequest) loadingHost = null
+    }
+  }
+
+  function cancelLoading() {
+    pageRequest++
+    loadingHost = null
+  }
+
+  function confirmPage() {
+    if (!pendingPage) return
+    saveLinkConsent()
+    openPage(pendingPage)
   }
 
   // A finished text opens at the start for another read-through.
@@ -192,7 +239,8 @@
     const share = parseShare(fields ? new URLSearchParams({ ...fields }) : query)
     if (location.search) history.replaceState(null, '', location.pathname)
     if (share.kind === 'document') await add(share.document)
-    if (share.kind === 'link') notice = "Links can't be opened yet. Share the text itself instead."
+    // Not awaited, so the library shows while the page loads.
+    if (share.kind === 'link') openPage(share.url)
   }
 
   // The fragment is cleared straight away so the text doesn't linger in the address bar or in
@@ -265,6 +313,12 @@
       onAppearanceChange={changeAppearance}
       onAdd={add}
       onOpenLink={openLink}
+      onOpenPage={openPage}
+      {pendingPage}
+      onConfirmPage={confirmPage}
+      onCancelPage={() => (pendingPage = null)}
+      {loadingHost}
+      onCancelLoading={cancelLoading}
       onOpen={open}
       onRemove={remove}
       {deleted}

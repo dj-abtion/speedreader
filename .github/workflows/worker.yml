@@ -1,0 +1,20 @@
+name: Worker
+
+on:
+  push:
+    branches: [main]
+    paths: [worker/**, .github/workflows/worker.yml]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Skipped until the Cloudflare credentials are added to the repository.
+    if: ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
