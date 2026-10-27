@@ -40,11 +40,6 @@ typography:
     lineHeight: 1
     letterSpacing: "-0.02em"
     fontFeature: "tnum"
-  stat-small:
-    fontFamily: "Bricolage Grotesque Variable, Figtree Variable, system-ui, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    fontFeature: "tnum"
   action:
     fontFamily: "Figtree Variable, system-ui, sans-serif"
     fontSize: "1.1rem"
@@ -211,7 +206,7 @@ A warm, near-monochrome paper palette with a single amber light source.
 ### Hierarchy
 - **Action** (Figtree 700, 1.1rem): the home screen's main button label.
 - **Display** (Bricolage 800, 3.25rem, line-height 1, -0.02em): the "Did read" headline on the finish screen.
-- **Stat** (Bricolage 700, 2.75rem, line-height 1, tabular): the home screen's time saved this month. **Stat Small** (Bricolage 700, 1.5rem, tabular): the finish screen's figures.
+- **Stat** (Bricolage 700, 2.75rem, line-height 1, tabular): the home screen's time saved this month, and the finish screen's time saved (in amber).
 - **Headline** (Bricolage 800, 1.9rem, line-height 1, -0.02em): the "didread" wordmark, with its middle "d" in amber.
 - **Title** (Figtree 600, 1rem, line-height 1.35): library card titles, clamped to two lines, and button labels.
 - **Body** (Figtree 400, 1rem, line-height 1.45): paragraphs and descriptions.
@@ -245,7 +240,7 @@ The system is flat. There are no box-shadows anywhere. Depth comes from tone alo
 
 ## Shapes
 
-Soft, generous corners that scale with the element. Default buttons and segmented controls are 0.5rem. Action buttons, text fields, stat tiles and the code panel are 0.9rem. Library cards and the "Up next" card are 1rem, and the install banner is 1.25rem. Icon buttons, the play button and the progress thumb are full circles, and the WPM and words-per-flash readouts are full pills. Progress bars are thin (0.375rem) with a 0.2rem radius.
+Soft, generous corners that scale with the element. Default buttons and segmented controls are 0.5rem. Action buttons, text fields and the code panel are 0.9rem. Library cards and the "Up next" card are 1rem, and the install banner is 1.25rem. Icon buttons, the play button and the progress thumb are full circles, and the words-per-flash control is a full pill. Progress bars are thin (0.375rem) with a 0.2rem radius.
 
 Icons are line-drawn: currentColor strokes at 2.2 (3 for the small stamp check), round caps and joins, no fills except the play triangle.
 
@@ -294,7 +289,10 @@ When playback reaches a code block it stops and says so: an uppercase Label head
 An empty library shows the reader's focal frame in miniature: "reading" with its amber pivot and guide ticks, a one-line Title heading, one Muted sentence on how it works and what to do, and a **Try a sample** pill that opens a short built-in text.
 
 ### Finish Check (signature)
-A 9rem muted rounded tile whose amber check draws itself in (600ms, 150ms delay, `cubic-bezier(0.3, 0, 0.2, 1)`). It doesn't animate when reduced motion is requested.
+A 9rem mark: two Muted guide ticks, as in the reader, with an amber check between them that draws itself in (600ms, 150ms delay, `cubic-bezier(0.3, 0, 0.2, 1)`). It doesn't animate when reduced motion is requested.
+
+### Finish Figure
+Under the title, one figure carries the moment: the time saved as an amber Stat, with "saved" in Muted beneath it. A Meta-sized sentence shows the working ("110 words in 7 s. At 238 wpm, the adult average, they would take 28 s."). A read slower than average leads with its own reading time instead, so the screen never claims a saving that didn't happen. No stat tiles.
 
 ## Do's and Don'ts
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-27T08:05:22+00:00",
+  "generatedAt": "2026-10-27T08:10:32+00:00",
   "title": "Design System: Didread",
   "extensions": {
     "colorMeta": {
@@ -304,11 +304,15 @@
       },
       "stat": {
         "displayName": "Stat",
-        "purpose": "Time saved this month on the home screen."
+        "purpose": "Time saved: this month on the home screen, and per text on the finish screen."
       },
-      "stat-small": {
-        "displayName": "Stat Small",
-        "purpose": "Finish-screen figures."
+      "action": {
+        "displayName": "Action",
+        "purpose": "The home screen's main button label."
+      },
+      "label-small": {
+        "displayName": "Label Small",
+        "purpose": "'Up next' on the finish screen."
       },
       "title": {
         "displayName": "Title",

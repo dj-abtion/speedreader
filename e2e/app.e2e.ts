@@ -197,7 +197,7 @@ test('celebrates a finished text and stamps it in the library', async ({ page })
   await page.keyboard.press('Space')
 
   await expect(page.getByRole('heading', { name: 'Did read' })).toBeVisible({ timeout: 10_000 })
-  await expect(page.locator('dl')).toContainText('words 3')
+  await expect(page.locator('.stats')).toContainText('3 words in')
   await page.getByRole('button', { name: 'Library' }).click()
 
   const card = page.getByRole('button', { name: /^Four short words/ })
