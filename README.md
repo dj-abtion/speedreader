@@ -1,6 +1,6 @@
 # Didread
 
-Too long? Did read. An installable, offline-capable RSVP speed reader. See [SPEC.md](SPEC.md) for the full v1 design.
+Too long? Did read. An installable, offline-capable RSVP speed reader. Read copied, pasted or shared text, `.txt` and `.md` files, or a web link, whose article Didread picks out of the page. See [SPEC.md](SPEC.md) for the full v1 design.
 
 The repo, the web address and the on-device storage keys still say `speedreader`, so existing installs, saved libraries and links keep working under the new name.
 
@@ -28,7 +28,12 @@ Merging to `main` deploys to GitHub Pages at `https://dj-abtion.github.io/speedr
 
 ## Opening web links
 
-Links are fetched by a small Cloudflare Worker in [`worker/`](worker/README.md), since browsers can't read most sites themselves. The deployed app uses the Worker at `didread-fetch.dj-3e1.workers.dev`; the setup steps for deploying it are in its README.
+A link that's copied, pasted or shared to Didread (on Android) opens the article on that page, without its menus and ads. The first link asks before anything is sent; after that, links open straight away.
+
+- **Fetching:** browsers can't read most sites themselves (CORS), so the page is fetched by a small Cloudflare Worker in [`worker/`](worker/README.md). It answers only Didread, refuses local addresses, non-web files and pages over 5 MB, and keeps no logs. It sees the page address, never the library.
+- **Reading:** the article is picked out on the device with Mozilla Readability, and an article already in the library is resumed rather than added again.
+- **Limits:** paywalled pages and pages built entirely by JavaScript have no article to find; copy their text instead. Opening a link needs a connection.
+- **Deploying:** the Worker deploys from `.github/workflows/worker.yml` when `worker/` changes on `main`, using the `CLOUDFLARE_API_TOKEN` secret and the `CLOUDFLARE_ACCOUNT_ID` variable. The app is built with its address, `https://didread-fetch.dj-3e1.workers.dev/`, unless the `LINK_FETCHER_URL` variable overrides it. Local builds have no fetcher, so links there say they can't be opened yet. Setup from scratch is in [`worker/README.md`](worker/README.md).
 
 ## `/speedread` skill for Claude Code
 
