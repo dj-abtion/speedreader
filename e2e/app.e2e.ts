@@ -202,6 +202,16 @@ test('celebrates a finished text and stamps it in the library', async ({ page })
 
   const card = page.getByRole('button', { name: /^Four short words/ })
   await expect(card).toContainText('Did read')
+
+  // Opening it again and leaving keeps the stamp.
+  await card.click()
+  await expect(page.locator('.frame')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(card).toContainText('Did read')
+
+  // Once the library has texts, the sample is still one tap away.
+  await page.getByRole('button', { name: 'How it works' }).click()
+  await expect(page.getByRole('heading', { name: 'How Didread works' })).toBeVisible()
 })
 
 test('confirms a speed change made while playing', async ({ page }) => {

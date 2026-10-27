@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { isFinished, openLibrary, type Library } from './library'
+import { isDone, isFinished, openLibrary, type Library } from './library'
 
 let library: Library
 let dbCounter = 0
@@ -38,6 +38,21 @@ describe('library', () => {
     const finished = await library.get(doc.id)
     expect(finished).toMatchObject({ position: 3, readingMs: 2000, finishedAt: expect.any(Number) })
     expect(isFinished(finished!)).toBe(true)
+  })
+
+  it('keeps the Did read stamp when a finished text is opened again', async () => {
+    const doc = await library.add({ title: 'Tale', text: 'a b c d' })
+    await library.markFinished(doc.id, 2000)
+    // Reopening starts a new read-through from the top.
+    await library.saveProgress(doc.id, 0, 0)
+    const reopened = (await library.get(doc.id))!
+    expect(isDone(reopened)).toBe(true)
+    expect(reopened).toMatchObject({ finishedAt: expect.any(Number), finishedReadingMs: 2000 })
+    // Reading on, it's in progress again, but still remembered as read.
+    await library.saveProgress(doc.id, 2, 800)
+    const rereading = (await library.get(doc.id))!
+    expect(isDone(rereading)).toBe(false)
+    expect(rereading.finishedAt).toBeDefined()
   })
 
   it('restores a deleted document exactly as it was', async () => {

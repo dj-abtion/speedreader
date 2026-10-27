@@ -457,7 +457,7 @@
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
           </button>
-          <span class="wpm">{wpm} <span class="unit">wpm</span></span>
+          <span class="wpm" title="Words per minute">{wpm} <span class="unit">wpm</span></span>
           <button
             class="step"
             onclick={() => changeWpm(WPM_STEP)}

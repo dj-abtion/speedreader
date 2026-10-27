@@ -8,7 +8,7 @@
   import { applyAppearance, loadAppearance, saveAppearance, type Appearance } from './lib/appearance'
   import Finish from './lib/Finish.svelte'
   import Home from './lib/Home.svelte'
-  import { isFinished, openLibrary, type LibraryDocument } from './lib/library'
+  import { isDone, isFinished, openLibrary, type LibraryDocument } from './lib/library'
   import { loadFinishes, recordFinish } from './lib/readingLog'
   import { SHARED_FLAG, takeSharedFields } from './lib/shareInbox'
   import Reader from './lib/Reader.svelte'
@@ -138,7 +138,7 @@
     if (id) await library.markFinished(id, total).catch(() => {})
     await refresh()
     if (finished?.id === id) {
-      finished.next = documents.find((doc) => doc.id !== id && !isFinished(doc)) ?? null
+      finished.next = documents.find((doc) => doc.id !== id && !isDone(doc)) ?? null
     }
   }
 

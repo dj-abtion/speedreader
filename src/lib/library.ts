@@ -10,11 +10,20 @@ export interface LibraryDocument extends NewDocument {
   // Active reading time for the current read-through. Documents saved before it was tracked
   // have none.
   readingMs?: number
+  // Set by the first finish and kept through later read-throughs, so the Did read stamp stays.
   finishedAt?: number
+  // Reading time of the last finished read-through, kept for the stamp while a new one is
+  // tracked in readingMs.
+  finishedReadingMs?: number
 }
 
 export function isFinished(doc: LibraryDocument): boolean {
   return doc.tokenCount > 0 && doc.position >= doc.tokenCount - 1
+}
+
+// Read before and not being read again: at the end, or reopened without getting past the start.
+export function isDone(doc: LibraryDocument): boolean {
+  return isFinished(doc) || (doc.finishedAt !== undefined && doc.position === 0)
 }
 
 interface LibrarySchema extends DBSchema {
@@ -77,6 +86,7 @@ export function openLibrary(name = 'speedreader') {
         position: Math.max(doc.tokenCount - 1, 0),
         readingMs,
         finishedAt: Date.now(),
+        finishedReadingMs: readingMs,
       }))
     },
 

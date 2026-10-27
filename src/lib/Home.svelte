@@ -7,7 +7,7 @@
   import type { Appearance } from './appearance'
   import AppearanceSettings from './AppearanceSettings.svelte'
   import InstallBanner from './InstallBanner.svelte'
-  import { isFinished, type LibraryDocument } from './library'
+  import { isDone, isFinished, type LibraryDocument } from './library'
   import { SAMPLE } from './sample'
   import { loadWpm } from './settings'
   import { GUIDE_HASH } from './skill'
@@ -52,7 +52,7 @@
   let showAppearance = $state(false)
   let inProgress = $derived(documents.filter((doc) => doc.position > 0 && !isFinished(doc)).length)
   // Unfinished texts lead, so the one to continue is never below a text that's already done.
-  let ordered = $derived([...documents].sort((a, b) => Number(isFinished(a)) - Number(isFinished(b))))
+  let ordered = $derived([...documents].sort((a, b) => Number(isDone(a)) - Number(isDone(b))))
   let textarea = $state<HTMLTextAreaElement>()
 
   async function togglePaste() {
@@ -108,6 +108,13 @@
     }
   }
 
+  // Reopens the sample if it's still in the library, rather than adding a copy each time.
+  function showSample() {
+    const saved = documents.find((doc) => doc.text === SAMPLE.text)
+    if (saved) onOpen(saved)
+    else onAdd(SAMPLE)
+  }
+
   function percent(doc: LibraryDocument): number {
     return Math.floor((doc.position / Math.max(doc.tokenCount, 1)) * 100)
   }
@@ -120,7 +127,8 @@
 
   function finishedIn(doc: LibraryDocument): string {
     const words = `${formatCount(doc.tokenCount)} words`
-    return doc.readingMs ? `${words} in ${formatDuration(doc.readingMs)}` : words
+    const readingMs = doc.finishedReadingMs ?? doc.readingMs
+    return readingMs ? `${words} in ${formatDuration(readingMs)}` : words
   }
 
   // Deleting is instant and undoable, so there's no confirmation to get through first.
@@ -228,7 +236,7 @@
       </div>
       <ul>
         {#each ordered as doc (doc.id)}
-          {@const done = isFinished(doc)}
+          {@const done = isDone(doc)}
           <li class:done>
             <button class="open" onclick={() => onOpen(doc)}>
               <span class="title">{doc.title}</span>
@@ -243,7 +251,15 @@
               {:else}
                 <span class="bar" aria-hidden="true"><span style:width={`${percent(doc)}%`}></span></span>
                 <span class="meta">
-                  <span>{formatCount(doc.tokenCount)} words</span>
+                  <!-- Being read again: the stamp stays beside the new progress. -->
+                  {#if doc.finishedAt !== undefined}
+                    <span class="stamp">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                      Did read
+                    </span>
+                  {:else}
+                    <span>{formatCount(doc.tokenCount)} words</span>
+                  {/if}
                   <span>{status(doc)}</span>
                 </span>
               {/if}
@@ -285,6 +301,10 @@
         event.preventDefault()
         onShowGuide()
       }}>Use with Claude →</a>
+    <!-- The welcome goes once the library has texts, so its sample stays one tap away here. -->
+    {#if documents.length > 0}
+      <button type="button" class="how" onclick={showSample}>How it works</button>
+    {/if}
     <span class="version">
       {#if buildInfo.commit}
         <a href={`${REPOSITORY_URL}/commit/${buildInfo.commit}`} target="_blank" rel="noreferrer"
@@ -330,17 +350,20 @@
     height: min(3.25rem, 13vw);
   }
 
+  /* The mark takes the theme's colours: a Surface tile on paper, never a dark slab in light mode. */
   .logo .tile {
-    fill: #1e1c19;
+    fill: var(--surface);
+    stroke: var(--guide);
+    stroke-width: 12;
   }
 
   .logo .guide {
-    fill: #8f897f;
+    fill: var(--muted);
   }
 
   .logo .tick {
     fill: none;
-    stroke: #ff8a4c;
+    stroke: var(--accent);
     stroke-width: 46;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -780,6 +803,19 @@
   .claude {
     color: var(--text);
     font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--guide);
+    text-underline-offset: 0.2em;
+  }
+
+  .how {
+    min-height: 0;
+    margin: -0.7rem 0;
+    padding: 0.7rem 0;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: inherit;
     text-decoration: underline;
     text-decoration-color: var(--guide);
     text-underline-offset: 0.2em;

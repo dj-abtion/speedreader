@@ -223,7 +223,7 @@ A warm, near-monochrome paper palette with a single amber light source.
 
 Single column, centred, phone-first. The home screen is at most 36rem wide, and the finish screen and reader controls at most 28rem. The code panel widens to 44rem and the paused context sentence to 40rem. Pages fill the viewport (`100dvh`), use a 1.25rem side gutter, and respect safe-area insets at the top and bottom.
 
-Spacing is relaxed but not airy. Most stacks use 0.6–0.75rem gaps, sections use 1.5rem, and the finish screen uses 2rem. The footer sits at the bottom with `margin-top: auto`; its links are Ink and Muted, never amber, so the main action keeps the only light.
+Spacing is relaxed but not airy. Most stacks use 0.6–0.75rem gaps, sections use 1.5rem, and the finish screen uses 2rem. The footer sits at the bottom with `margin-top: auto`; its links (Use with Claude, and How it works, which reopens the sample once the library has texts) are Ink and Muted, never amber, so the main action keeps the only light.
 
 The reader is a full-viewport stage. The top bar holds close, the text's title (small, Muted, one line) and Aa. The word centres in the middle, and controls plus the progress line sit at the bottom. Tapping anywhere on the stage plays or pauses. While paused the screen is about reading first: the faint context sentence under the word, a hint (taps on touch screens, keys with a mouse), the amber play button as the only filled control, and quiet sentence skips beside it. Below 360px the settings row wraps.
 
@@ -244,7 +244,7 @@ Soft, generous corners that scale with the element. Default buttons and segmente
 
 Icons are line-drawn: currentColor strokes at 2.2 (3 for the small stamp check), round caps and joins, no fills except the play triangle.
 
-The mark is a rounded tile (radius about 22% of its size) with two short guide ticks and an amber check. It echoes the reader's focal column and the "Did read" finish.
+The mark is a rounded tile (radius about 22% of its size) with two short guide ticks and an amber check. It echoes the reader's focal column and the "Did read" finish. In the app it takes the theme's colours: a Surface tile with a Guide edge, Muted ticks and an amber check, so it's never a dark slab on light paper.
 
 ## Components
 
@@ -298,7 +298,7 @@ An empty library shows the reader's focal frame in miniature: "reading" with its
 A 9rem mark: two Muted guide ticks, as in the reader, with an amber check between them that draws itself in (600ms, 150ms delay, `cubic-bezier(0.3, 0, 0.2, 1)`). It doesn't animate when reduced motion is requested.
 
 ### Finish Figure
-Under the title, one figure carries the moment: the time saved as an amber Stat, with "saved" in Muted beneath it. A Meta-sized sentence shows the working ("110 words in 7 s. At 238 wpm, the adult average, they would take 28 s."). A read slower than average leads with its own reading time instead, so the screen never claims a saving that didn't happen. No stat tiles.
+Under the title, one figure carries the moment: the time saved as an amber Stat, with "saved" in Muted beneath it. A Meta-sized sentence shows the working ("110 words in 7 s. At 238 words a minute, the adult average, they would take 28 s."), spelling out the rate rather than "wpm". The figure, title and actions are centred as one group, so a tall screen leaves space around the moment, not inside it. A read slower than average leads with its own reading time instead, so the screen never claims a saving that didn't happen. No stat tiles.
 
 ## Do's and Don'ts
 

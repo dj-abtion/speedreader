@@ -69,8 +69,8 @@
       <p class="lead"><strong>{formatDuration(readingMs)}</strong> of reading</p>
     {/if}
     <p class="detail">
-      {formatCount(words)} {words === 1 ? 'word' : 'words'} in {formatDuration(readingMs)}. At {AVERAGE_WPM} wpm, the
-      adult average, {words === 1 ? 'it' : 'they'} would take {formatDuration(averageMs)}.
+      {formatCount(words)} {words === 1 ? 'word' : 'words'} in {formatDuration(readingMs)}. At {AVERAGE_WPM} words a
+      minute, the adult average, {words === 1 ? 'it' : 'they'} would take {formatDuration(averageMs)}.
     </p>
   </div>
 
@@ -95,9 +95,11 @@
 </div>
 
 <style>
+  /* The whole moment is centred as one group, so a tall screen doesn't open a gap inside it. */
   .finish {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 2rem;
     width: min(28rem, 100%);
     min-height: 100dvh;
@@ -106,7 +108,6 @@
   }
 
   .done {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
