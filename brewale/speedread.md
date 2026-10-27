@@ -48,6 +48,16 @@ SPEEDREAD_EOF
 
 Use `--stdin` the same way when the user wants something other than a whole reply sped up (e.g. "speedread just the plan section").
 
+## Web pages
+
+This skill turns Claude's own replies into links. When the user wants to speed-read a web page, don't fetch the page and pipe it in: Didread opens web links itself and picks out the article. Say so in one line, for example:
+
+```markdown
+Copy the page's link and tap Read clipboard in [Didread](https://dj-abtion.github.io/speedreader/), or share the page to Didread on Android. It opens the article without the menus and ads.
+```
+
+Only fall back to `--stdin` with the page's text when the user asks for that, or the page can't be opened (paywalls, pages built entirely by JavaScript).
+
 ## Gotchas
 
 - If Node isn't available, or code execution is off, say so in one line. Don't try to build the link by hand.
